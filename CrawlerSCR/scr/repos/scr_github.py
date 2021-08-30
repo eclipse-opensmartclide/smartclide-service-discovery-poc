@@ -13,6 +13,7 @@ from github import RateLimitExceededException
 
 # own
 from scr.utils import SCRUtils, PrintLog
+from scr.postgresql.config import postgresql
 
 class CrawlerGitHub:
     # constructor
@@ -90,8 +91,6 @@ class CrawlerGitHub:
         while True:      
             try:
                 for repo in payload:    
-
-                    # TODO> github.GithubException.GithubException: 409  HANDLE Git Repository is empty.
                     # Make sure we have strings
                     clone_url = str(repo.clone_url)
                     description = str(repo.description)
@@ -146,7 +145,9 @@ class CrawlerGitHub:
                     file_name = "GitHub_kw_"
 
                 SCRUtils.export_csv(df_github, "./output/", file_name + keywords, True, True)               
-                PrintLog.log("Inserting into github postgre db: " + file_name + keywords)              
+                PrintLog.log("Inserting into github postgre db: " + file_name + keywords)      
+                post = postgresql()
+                post.upload_to_db("github", df_github)        
                 #SCRUtils.upload_to_db("github", df_github)
                 break
 
