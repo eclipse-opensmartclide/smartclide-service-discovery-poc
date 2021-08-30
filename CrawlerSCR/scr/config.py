@@ -13,14 +13,15 @@ class FlaskConfig():
 
 # scr tokens
 class SCRConfig():
+    # New
 	# GitHub API
-	GITHUB_ACCESS_TOKEN_1 = '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'
+	GITHUB_ACCESS_TOKEN_1 = 'REDACTED'
 	# GitLab API
-	GITLAB_ACCESS_TOKEN_1 = 'KTsSwjwCQ7tN4pYCMsyb'
+	GITLAB_ACCESS_TOKEN_1 = 'REDACTED'
 	# BitBucket API
-	BITBUCKET_ACCESS_TOKEN_1 = 'todo'
+	BITBUCKET_ACCESS_TOKEN_1 = 'REDACTED'
  
  
 	# More tokens..
-	GITHUB_ACCESS_TOKEN_2 = 'todo'
+	GITHUB_ACCESS_TOKEN_2 = 'REDACTED'
 
