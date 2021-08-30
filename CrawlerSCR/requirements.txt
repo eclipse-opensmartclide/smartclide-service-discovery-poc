@@ -10,3 +10,4 @@ pandas
 numpy
 lxml
 psycopg2
+sqlalchemy
