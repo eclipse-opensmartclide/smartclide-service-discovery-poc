@@ -20,8 +20,9 @@ class postgresql():
         """    
         # Create tables if not exists
         self.init_create_tables()
-        # Insert the data, no primary keys  
-        self.insert_dataframe_into_table(table, dataframe)
+        # Insert the data, no primary keys 
+        in_dataframe = dataframe
+        self.insert_dataframe_into_table(table, in_dataframe)
         # Handle dupes in the modified table
         self.delete_duplicates(table)
         
@@ -29,13 +30,18 @@ class postgresql():
         """
         Function for parsing the configuration file of the postgre db.
         """  
-        parser = ConfigParser()
+        parser = ConfigParser()    
         parser.read(filename)
-        if not parser.has_section(section):
+        # get section, default to postgresql
+        db = {}
+        if parser.has_section(section):
+            params = parser.items(section)
+            for param in params:
+                db[param[0]] = param[1]
+        else:
             raise Exception('Section {0} not found in the {1} file'.format(section, filename))
 
-        params = parser.items(section)
-        return {param[0]: param[1] for param in params}
+        return db
     
     def test_connection(self):
         """
@@ -44,23 +50,23 @@ class postgresql():
         conn = None
         try:
             params = self.config()                      
-            PrintLog.print_log('Connecting to the PostgreSQL database...')
+            PrintLog.log('Connecting to the PostgreSQL database...')
             conn = psycopg2.connect(**params)           
             cur = conn.cursor()            
             # execute a statement
-            PrintLog.print_log('PostgreSQL database version:')
+            PrintLog.log('PostgreSQL database version:')
             cur.execute('SELECT version()')
             # display the PostgreSQL database server version
             db_version = cur.fetchone()
-            PrintLog.print_log(db_version)        
+            PrintLog.log(db_version)        
             # close the communication with the PostgreSQL
             cur.close()
         except (Exception, psycopg2.DatabaseError) as error:
-            PrintLog.print_log(error)
+            PrintLog.log(error)
         finally:
             if conn is not None:
                 conn.close()
-                PrintLog.print_log('Database connection closed.')
+                PrintLog.log('Database connection closed.')
     
     # Commands must be a python list
     def execute_commands(self, commands):    
@@ -70,20 +76,20 @@ class postgresql():
         conn = None
         try:           
             params = self.config()
-            PrintLog.print_log('Connecting to the PostgreSQL database')
+            PrintLog.log('Connecting to the PostgreSQL database')
             conn = psycopg2.connect(**params)
             cur = conn.cursor()
             # create tables            
             for command in commands:
-                PrintLog.print_log("\nExecuting:", command)
+                PrintLog.log("\nExecuting:" + command)
                 cur.execute(command)
             conn.commit()
             cur.close()            
         except (Exception, psycopg2.DatabaseError) as error:
-            PrintLog.print_log(error)
+            PrintLog.log(error)
         finally:
             if conn is not None:
-                PrintLog.print_log('Finished ok.')
+                PrintLog.log('Finished ok.')
                 conn.close()
     
     def init_create_tables(self):
@@ -156,9 +162,9 @@ class postgresql():
             data.to_sql(table, engine, if_exists='append') # if_exists the table append     
                              
         except (Exception) as error:
-            PrintLog.print_log(error)
+            PrintLog.log(error)
         finally:
-            PrintLog.print_log("Inserted: ", data)
+            #PrintLog.log("Inserted: " + data)
             return
         
     def delete_duplicates(self, table):
