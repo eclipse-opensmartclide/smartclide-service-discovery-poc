@@ -9,6 +9,7 @@ from bs4 import BeautifulSoup
 
 # own
 from scr.utils import SCRUtils
+from scr.postgresql.config import postgresql
 
 class CrawlerBitbucket:
     # Constructor
@@ -132,6 +133,9 @@ class CrawlerBitbucket:
 
         file_name = "Bitbucket_kw_"
         SCRUtils.export_csv(df_bitbucket_web, "./output/", file_name + keyword_split, True, True)
+        
+        post = postgresql()
+        post.upload_to_db("bitbucket", df_bitbucket_web)   
         
         #SCRUtils.upload_to_db("bitbucket", df_bitbucket_web)
         return df_bitbucket_web
