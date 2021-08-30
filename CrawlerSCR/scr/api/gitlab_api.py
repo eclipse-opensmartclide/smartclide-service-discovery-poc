@@ -9,6 +9,8 @@ from scr.api.v1 import api
 from scr.core import cache, limiter
 from scr.utils import FlaskUtils
 
+from scr.postgresql.config import postgresql
+
 # gitlab
 from scr.config import SCRConfig
 #from scr.api.gitlab_model import github_model
@@ -34,7 +36,7 @@ class GetGitLabRepos(Resource):
 
         is_from_url = False
         is_from_keyword = False
-        r_json = ""
+        r_json = ""        
         try:
             args = gitlab_argument_parser.parse_args()
             from_url = args['from_url']
@@ -79,4 +81,5 @@ class GetGitLabRepos(Resource):
             return FlaskUtils.handle404error(gitlab_ns, 'No GitLab repos was found for the given parameters.')
         
         # TODO: Shdl we return the raw repos found or the info about them? EX: found 39 new repos, inserted into the database ok.
+        
         return r_json
