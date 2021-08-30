@@ -6,6 +6,7 @@ import re
 
 # own
 from scr.utils import SCRUtils
+from scr.postgresql.config import postgresql
 
 class CrawlerGitLab:
     # constructor
@@ -125,7 +126,9 @@ class CrawlerGitLab:
             file_name = "GitLab_kw_"
 
         SCRUtils.export_csv(df_gitlab, "./output/", file_name + payload, True, True)
-
+        
+        post = postgresql()
+        post.upload_to_db("gitlab", df_gitlab)
         return df_gitlab
 
 
