@@ -15,7 +15,7 @@ from scr.config import SCRConfig
 from scr.api.github_parser import github_argument_parser
 from scr.repos.scr_github import CrawlerGitHub
 
-github_ns = api.namespace('github', description='Crawler GitHub')
+github_ns = api.namespace('crawl_github', description='Crawler GitHub')
 
 @github_ns.route('', methods = ['GET']) # url/user
 class GetGitHubRepos(Resource):

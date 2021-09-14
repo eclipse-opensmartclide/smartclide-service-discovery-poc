@@ -9,5 +9,8 @@ bs4
 pandas
 numpy
 lxml
-psycopg2
+psycopg2-binary
+PyGithub
+Elasticsearch
 sqlalchemy
+fsspec

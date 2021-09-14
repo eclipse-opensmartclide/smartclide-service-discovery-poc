@@ -9,7 +9,6 @@ from scr.api.v1 import api
 from scr.core import cache, limiter
 from scr.utils import FlaskUtils
 
-from scr.postgresql.config import postgresql
 
 # gitlab
 from scr.config import SCRConfig
@@ -17,7 +16,7 @@ from scr.config import SCRConfig
 from scr.api.gitlab_parser import gitlab_argument_parser
 from scr.repos.scr_gitlab import CrawlerGitLab
 
-gitlab_ns = api.namespace('gitlab', description='Crawler GitLab')
+gitlab_ns = api.namespace('crawl_gitlab', description='Crawler GitLab')
 
 @gitlab_ns.route('', methods = ['GET']) # url/user
 class GetGitLabRepos(Resource):

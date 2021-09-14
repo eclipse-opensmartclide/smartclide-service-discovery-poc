@@ -115,6 +115,8 @@ class CrawlerBitbucket:
                     "description": description,
                     "link": "https://bitbucket.org" + repo.find('a', {"class": "repo-link"}, href=True)['href'],
                     "updated_on": repo_metadata_li[1].find('time')['datetime'],
+                    "stars": "-1",                 
+                    "forks": "-1",
                     "watchers": repo_metadata_li[0].find('a').text.strip().replace(" watchers", "").replace(" watcher", ""),
                     "keywords": keyword_split,
                     "source": "Bitbucket"
@@ -135,7 +137,7 @@ class CrawlerBitbucket:
         SCRUtils.export_csv(df_bitbucket_web, "./output/", file_name + keyword_split, True, True)
         
         post = postgresql()
-        post.upload_to_db("bitbucket", df_bitbucket_web)   
+        post.upload_to_db("scr", df_bitbucket_web)   
         
         #SCRUtils.upload_to_db("bitbucket", df_bitbucket_web)
         return df_bitbucket_web

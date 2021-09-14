@@ -98,7 +98,8 @@ class CrawlerGitLab:
                     "description": description,                    
                     "link": repo['web_url'],
                     "stars": repo['star_count'],                 
-                    "forks": repo['forks_count'],             
+                    "forks": repo['forks_count'],
+                    "watchers": "-1",           
                     "updated_on": repo['last_activity_at'],
                     #"id": repo['id'],
                     "keywords": merged_kw,
@@ -128,7 +129,7 @@ class CrawlerGitLab:
         SCRUtils.export_csv(df_gitlab, "./output/", file_name + payload, True, True)
         
         post = postgresql()
-        post.upload_to_db("gitlab", df_gitlab)
+        post.upload_to_db("scr", df_gitlab)
         return df_gitlab
 
 

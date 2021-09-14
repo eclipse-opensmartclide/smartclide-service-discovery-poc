@@ -16,7 +16,7 @@ from scr.config import SCRConfig
 from scr.api.bitbucket_parser import bitbucket_argument_parser
 from scr.repos.scr_bitbucket import CrawlerBitbucket
 
-bitbucket_ns = api.namespace('bitbucket', description='Crawler Bitbucket')
+bitbucket_ns = api.namespace('crawl_bitbucket', description='Crawler Bitbucket')
 
 @bitbucket_ns.route('', methods = ['GET']) # url/user
 class GetBitbucketRepos(Resource):

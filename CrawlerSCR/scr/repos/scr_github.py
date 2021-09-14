@@ -147,7 +147,7 @@ class CrawlerGitHub:
                 SCRUtils.export_csv(df_github, "./output/", file_name + keywords, True, True)               
                 PrintLog.log("Inserting into github postgre db: " + file_name + keywords)      
                 post = postgresql()
-                post.upload_to_db("github", df_github)        
+                post.upload_to_db("scr", df_github)        
                 #SCRUtils.upload_to_db("github", df_github)
                 break
 

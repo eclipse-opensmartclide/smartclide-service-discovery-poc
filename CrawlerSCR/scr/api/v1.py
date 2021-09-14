@@ -1,22 +1,38 @@
 #!flask/bin/python
 # Eclipse Public License 2.0
 
+
 from flask_restx import Api
 from flask_restx import Resource
+from flask import request
 from scr.core import cache, limiter
+
+import pandas as pd
+from io import StringIO
+
+from scr.postgresql.config import postgresql
 
 api = Api(version='1.0',
 		  title='SCR project',
 		  description="**SCR project's Flask RESTX API**")
 
-## TODO: MB, handle satus for avoid abusive calls + report api tokens status
-status_ns = api.namespace('status', description='Crawler status')
-@status_ns.route('', methods = ['GET']) # url/user
+insert_ns = api.namespace('service_insert', description='Insert a new service to the registry')
+@insert_ns.route('', methods = ['POST']) # url/user
 class GetStatus(Resource):
     @limiter.limit('1000/hour') 
     @cache.cached(timeout=84600, query_string=True)   
     @api.response(404, 'Data not found')
     @api.response(500, 'Unhandled errors')
     @api.response(400, 'Invalid parameters')
-    def get(self):
-    	return "TODO"
+    def post(self):
+        if request.method == 'POST':
+            content = request.json
+            df = pd.read_json(StringIO(content))
+            print(df)
+
+            ## TODO> Handle errors..
+            pg = postgresql()
+            pg.insert_dataframe_into_table("internal", df)
+            pg.delete_duplicates("internal")
+            ## TODO> Return pg info instead of the content
+            return content

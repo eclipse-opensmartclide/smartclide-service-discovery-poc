@@ -98,46 +98,32 @@ class postgresql():
         """  
         # No PRIMARY KEY since we manage duplicates in other ways
         # Some repos can appear with diferents topics, the databse sld manage those and merge them by topics     
-        create_tables = (
+        create_tables =(
             """
-            CREATE TABLE IF NOT EXISTS github (
-                index BIGINT,
+            CREATE TABLE IF NOT EXISTS scr (
                 full_name TEXT,
+                description TEXT,
+                link TEXT NOT NULL PRIMARY KEY,
+                stars INTEGER,
+                forks INTEGER,
+                watchers INTEGER,
+                updated_on TEXT,
+                keywords TEXT,
+                source TEXT NOT NULL
+            )
+            """,
+            """
+            CREATE TABLE IF NOT EXISTS internal (
+                full_name TEXT PRIMARY KEY,
                 description TEXT,
                 link TEXT NOT NULL,
-                stars INTEGER,
-                forks INTEGER,
-                watchers INTEGER,
                 updated_on TEXT,
                 keywords TEXT,
                 source TEXT NOT NULL
             )
-            """,
-            """ 
-            CREATE TABLE IF NOT EXISTS gitlab (
-                index BIGINT,
-                full_name TEXT,
-                description TEXT,
-                link TEXT  NOT NULL,
-                stars INTEGER,
-                forks INTEGER,
-                updated_on TEXT,
-                keywords TEXT,
-                source TEXT NOT NULL
-            )
-            """,
-            """ 
-            CREATE TABLE IF NOT EXISTS bitbucket (
-                index BIGINT,
-                full_name TEXT,
-                description TEXT,
-                link TEXT  NOT NULL,
-                watchers INTEGER,
-                updated_on TEXT,
-                keywords TEXT,
-                source TEXT NOT NULL
-            )
-            """)
+            """
+        )
+        
         # connect and create        
         self.execute_commands(create_tables)
                     
@@ -158,8 +144,8 @@ class postgresql():
             )
             # sqlalchemy
             engine = create_engine(connection)
-                  
-            data.to_sql(table, engine, if_exists='append') # if_exists the table append     
+
+            data.to_sql(table, engine, if_exists='append', index=False) # if_exists the table append     
                              
         except (Exception) as error:
             PrintLog.log(error)
@@ -170,20 +156,12 @@ class postgresql():
     def delete_duplicates(self, table):
         """
         Function to remove duplicates in the table passed as argument.
-        """        
+        """
         # list of columns that must contain the same data in order to delete duplicates
-        github_cols =    "full_name, description, link, stars, forks, watchers, updated_on, keywords, source"
-        gitlab_cols =    "full_name, description, link, stars, forks, updated_on, keywords, source"
-        bitbucket_cols = "full_name, description, link, watchers, updated_on, keywords, source"
-        
-        if table == "github":
-            cols = github_cols
-        elif table == "gitlab":
-            cols = gitlab_cols
-        elif table == "bitbucket":
-            cols = bitbucket_cols
-        else:
-            return "Select a valid table"
+        cols =  "full_name, description, link, stars, forks, watchers, updated_on, keywords, source"
+
+        if table == "internal":
+            cols = "full_name, description, link, updated_on, keywords, source"
 
         # ctid points to the physical location of the record in the table
         del_duplicates = [

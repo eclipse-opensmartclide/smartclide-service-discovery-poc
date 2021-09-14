@@ -17,14 +17,15 @@ from scr.utils import PrintLog
 from scr.api.github_api import github_ns
 from scr.api.gitlab_api import gitlab_ns
 from scr.api.bitbucket_api import bitbucket_ns
-from scr.api.v1 import status_ns
+from scr.api.search_api import search_ns
+from scr.api.v1 import insert_ns
 
 app = Flask(__name__)
 
 VERSION = (1, 0)
 AUTHOR = 'AIR - David Berrocal (@dabm-git)'
 
-namespaces = [ github_ns, gitlab_ns, bitbucket_ns, status_ns ]
+namespaces = [ github_ns, gitlab_ns, bitbucket_ns, search_ns, insert_ns ]
 
 def get_version():
     """
@@ -69,8 +70,8 @@ def initialize_app(flask_app):
              
 def main():
     # logging
-    logging.basicConfig(filename='scr_api.log', 
-                            encoding='utf-8', 
+    logging.basicConfig(handlers=[logging.FileHandler(filename='scr_api.log', 
+                            encoding='utf-8')],
                             level=logging.INFO, # level=logging.INFO
                             format='%(asctime)s %(message)s', 
                             datefmt='%d/%m/%Y %I:%M:%S %p')
