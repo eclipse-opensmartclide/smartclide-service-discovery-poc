@@ -13,7 +13,7 @@ class FlaskConfig():
 
 # scr tokens
 class SCRConfig():
-    # New
+    # The tokens are examples and are not valid
 	# GitHub API
 	GITHUB_ACCESS_TOKEN_1 = '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'
 	# GitLab API
