@@ -1,0 +1,41 @@
+[
+    {
+        "database": "services",
+        "index": "scr",
+        "id": "test",
+        "nodes":
+        {
+            "table": "scr",
+            "schema": "public",
+            "columns": [
+                "full_name",
+                "description",
+                "link",
+                "stars",
+                "forks",
+                "watchers",
+                "updated_on",
+                "keywords",
+                "source"
+            ]
+        }
+    },
+    {
+        "database": "services",
+        "index": "internal",
+        "id": "demo",
+        "nodes":
+        {
+            "table": "internal",
+            "schema": "public",
+            "columns": [
+                "full_name",
+                "description",
+                "link",
+                "updated_on",
+                "keywords",
+                "source"
+            ]
+        }
+    }
+]
