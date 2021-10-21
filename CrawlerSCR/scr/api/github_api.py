@@ -67,7 +67,7 @@ class GetGitHubRepos(Resource):
                 r_json = ""
             else:                
                 # split records index values table columns (the default format)
-                result = r.to_json()    #orient="table")
+                result = r.to_json(orient="records")
                 r_json = json.loads(result)
 
         except Exception as e:
@@ -75,6 +75,6 @@ class GetGitHubRepos(Resource):
 
         # if there is not repos found  r_json == "", return 404 error
         if not r_json:
-            return FlaskUtils.handle404error(github_ns, 'No GitHub repos was found for the given parameters.')
+            return FlaskUtils.handle404error(github_ns, 'No GitHub repos was found for the given parameters, or bad credentials')
         # TODO: Shdl we return the raw repos found or the info about them? EX: found 39 new repos, inserted into the database ok.
         return r_json

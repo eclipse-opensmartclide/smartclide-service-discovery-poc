@@ -10,6 +10,7 @@ import re
 # pygithub
 from github import Github
 from github import RateLimitExceededException
+from github import BadCredentialsException
 
 # own
 from scr.utils import SCRUtils, PrintLog
@@ -27,7 +28,7 @@ class CrawlerGitHub:
         """
         Parses the URL given to search for repositories in GitHub.
         """
-        # find all the text bwt / and get the last [-1] 
+        # find all the text bwt / and get the last [-1] the org/user
         # https://github.com/dabm-git/ --> [https:] [github.com] [dabm-git]
         username = re.findall("([^\/]+)", url)[-1]
 
@@ -104,7 +105,7 @@ class CrawlerGitHub:
                     # Since PaginatedList does not admit [-1]
                     commits = repo.get_commits().reversed                    
                     updated_on = str(commits[0].commit.author.date)
-              
+
                     # If we have more topics, merge them with the kw
                     merged_kw = keywords                    
                     if topics:
@@ -114,7 +115,8 @@ class CrawlerGitHub:
                     # Find the word after url / and remove .git
                     name = re.findall("([^/]*)$", str(clone_url))
                     full_name = name[0].replace('.git', '')
-
+                    
+                    # Build the dataframe
                     df_temp = pd.DataFrame({                        
                         'full_name': full_name,
                         'description': description,
@@ -132,9 +134,12 @@ class CrawlerGitHub:
                     # Random delay to avoid requests timeout
                     time.sleep(random.uniform(0.1, 0.3))
 
-                # loop result end 
+                # loop result end
                 raise StopIteration
-
+            
+            except BadCredentialsException:
+                PrintLog.log("\nGitHub Bad credentials")
+                break
             except StopIteration:
                 # Backup, one file per keyword
                 df_github.reset_index(drop=True, inplace=True)
@@ -144,10 +149,11 @@ class CrawlerGitHub:
                 if from_keywords:
                     file_name = "GitHub_kw_"
 
-                SCRUtils.export_csv(df_github, "./output/", file_name + keywords, True, True)               
-                PrintLog.log("Inserting into github postgre db: " + file_name + keywords)      
-                post = postgresql()
-                post.upload_to_db("scr", df_github)        
+                SCRUtils.export_csv(df_github, "./output/", file_name + keywords, True, True) 
+                              
+                #PrintLog.log("Inserting into github postgre db: " + file_name + keywords)      
+                #post = postgresql()
+                #post.upload_to_db("scr", df_github)        
                 #SCRUtils.upload_to_db("github", df_github)
                 break
 

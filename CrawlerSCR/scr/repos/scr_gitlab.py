@@ -128,8 +128,10 @@ class CrawlerGitLab:
 
         SCRUtils.export_csv(df_gitlab, "./output/", file_name + payload, True, True)
         
-        post = postgresql()
-        post.upload_to_db("scr", df_gitlab)
+        # To postgresql
+        #post = postgresql()
+        #post.upload_to_db("scr", df_gitlab)
+        
         return df_gitlab
 
 
