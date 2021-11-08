@@ -69,7 +69,7 @@ class GetGitHubRepos(Resource):
             if is_from_topic:
                 r = github.get_from_topic(from_topic)
             
-            if r == None or r.empty:
+            if r is None or r.empty:
                 r_json = ""
             else:                
                 # split records index values table columns (the default format)

@@ -9,12 +9,8 @@ from elasticsearch import Elasticsearch
 from elasticsearch import helpers
 from configparser import ConfigParser
 
-from scr.repos.clean_data import ServiceCrawledDataPreProcess
-
 class elastic():
     
-    preprocess = ServiceCrawledDataPreProcess() # ZK work
-
     def configure_elastic(self):
         # connect to elasticserach        
         config = self.config()
@@ -22,7 +18,7 @@ class elastic():
     
         es = Elasticsearch(
             [config['host']+ ':9200'], # default port
-            #http_auth=('user', 'secret'),
+            http_auth=(config['user'], config['password']),
             scheme="http",
             verify_certs=False,
             http_compress=True
@@ -62,7 +58,7 @@ class elastic():
         for index, document in df_iter:
             yield {
                     "_index": 'scr_index', # index of crawled data
-                    #"_type": "_doc", # decrapated
+                    "_type": "_doc", # decrapated
                     "_id" : f"{document['full_name']}", # use the full name as id user+serviceName
                     "_source": document.to_dict(), # use a filter?
                 }    

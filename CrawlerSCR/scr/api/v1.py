@@ -10,8 +10,6 @@ from scr.core import cache, limiter
 import pandas as pd
 from io import StringIO
 
-from scr.postgresql.config import postgresql
-
 api = Api(version='1.0',
 		  title='SCR project',
 		  description="**SCR project's Flask RESTX API**")
@@ -29,10 +27,5 @@ class GetStatus(Resource):
             content = request.json
             df = pd.read_json(StringIO(content))
             print(df)
-
-            ## TODO> Handle errors..
-            pg = postgresql()
-            pg.insert_dataframe_into_table("internal", df)
-            pg.delete_duplicates("internal")
-            ## TODO> Return pg info instead of the content
+            ## TODO> INSERT TO ELASTIC!
             return content

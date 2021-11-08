@@ -6,8 +6,8 @@ class FlaskConfig():
 	PORT = 2020
 	HOST = '0.0.0.0'
 	URL_PREFIX = '/scr/v1'
-	DEBUG_MODE = True
-	USE_HTTPS = not DEBUG_MODE
+	DEBUG_MODE = False
+	USE_HTTPS = DEBUG_MODE # not for now
 	SSL_KEY = './certs/server.key'
 	SSL_CERT = './certs/server.crt'
 
