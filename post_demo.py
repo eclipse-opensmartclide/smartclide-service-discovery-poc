@@ -54,7 +54,7 @@ head_nocache = {
     "Pragma": "no-cache"
 }
 
-uri = 'http://18.184.134.122:2020/scr/v1/service_insert'
+uri = 'URI/scr/v1/service_insert'
 
 res = requests.post(uri, json = demo_json, headers= head_nocache) # demo_json2
 if res.ok:

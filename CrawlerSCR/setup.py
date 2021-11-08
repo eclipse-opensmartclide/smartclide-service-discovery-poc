@@ -20,7 +20,7 @@ setup(
     url='',
     download_url='',
     license='Eclipse Public License 2.0',
-    author='David Berrocal Macias',
+    author='AIR Institute',
     author_email='dabm@usal.es',
     description='Flask RESTX API for Service Code Repository Crawler',
     long_description=readme(),

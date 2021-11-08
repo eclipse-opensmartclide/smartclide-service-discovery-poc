@@ -61,7 +61,7 @@ class GetBitbucketRepos(Resource):
             # TODO: param forks
             if is_from_url:                
                 #r = bitbucket.get_from_url(from_url, get_forks=False)
-                return FlaskUtils.handle500error(bitbucket_ns)
+                return FlaskUtils.handle500error2(bitbucket_ns)
             if is_from_keyword:                
                 r = bitbucket.get_from_keywords_web(from_keyword)
                 
