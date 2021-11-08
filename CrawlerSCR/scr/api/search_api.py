@@ -44,8 +44,8 @@ class GetStatus(Resource):
                 }
             }
             
-            # Hardcode Connect
-            remote_elastic = '18.184.134.122'
+            # TODO read from database.ini
+            remote_elastic = ''
             elastic_client = Elasticsearch(hosts=[remote_elastic])
 
             # The actual search
