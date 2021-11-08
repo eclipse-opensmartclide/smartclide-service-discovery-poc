@@ -33,22 +33,26 @@ class GetGitHubRepos(Resource):
         # retrieve and chek arguments
         is_from_url = False
         is_from_keyword = False
+        is_from_topic = False
         r_json = ""
         try:
             args = github_argument_parser.parse_args()
             from_url = args['from_url']
             from_keyword = args['from_keyword']
+            from_topic = args['from_topic']
             # None
-            if from_keyword is None and from_url is None:
+            if from_keyword is None and from_url is None and from_topic is None:
                 raise Exception("ValueError")
             # Both
-            if from_url and from_keyword:
+            if from_url and from_keyword and from_topic:
                 raise Exception("ValueError")
             # Only one
             if from_url:
                 is_from_url = True
-            else:
+            if from_keyword:
                 is_from_keyword = True
+            if from_topic:
+                is_from_topic = True
 
         except Exception as e:
             #raise e
@@ -59,11 +63,13 @@ class GetGitHubRepos(Resource):
             # TODO: handle more API tokens in case of limit
             github = CrawlerGitHub(SCRConfig.GITHUB_ACCESS_TOKEN_1)            
             if is_from_url:                
-                r = github.get_from_url(from_url, get_forks=False)
+                r = github.get_from_url(from_url)
             if is_from_keyword:                
                 r = github.get_from_keywords(from_keyword)
+            if is_from_topic:
+                r = github.get_from_topic(from_topic)
             
-            if r.empty:
+            if r == None or r.empty:
                 r_json = ""
             else:                
                 # split records index values table columns (the default format)

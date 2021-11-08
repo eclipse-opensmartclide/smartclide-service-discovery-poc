@@ -20,8 +20,8 @@ demo_json = """
 }
 """
 
-uri = 'http://18.184.134.122:2020/scr/v1/service_search'
-#uri = 'http://localhost:2020/scr/v1/service_search'
+uri = 'URI'
+#uri = 'URI'
 
 res = requests.post(uri, json = demo_json) # demo_json2
 if res.ok:

@@ -5,10 +5,15 @@ import pandas as pd
 import re
 
 # own
-from scr.utils import SCRUtils
-from scr.postgresql.config import postgresql
+from scr.utils import SCRUtils, PrintLog
+from scr.elastic.elastic import elastic
+from scr.repos.clean_data import ServiceCrawledDataPreProcess
 
 class CrawlerGitLab:
+
+    preprocess = ServiceCrawledDataPreProcess()
+    elastic_end = elastic()
+
     # constructor
     def __init__(self, ptoken):
         """
@@ -50,6 +55,8 @@ class CrawlerGitLab:
         url = ""
         w_flag = True
 
+        PrintLog.log("Get GitLab repos started: " + payload)
+
         # Iterate pages
         while (w_flag):        
             if from_url:
@@ -60,7 +67,7 @@ class CrawlerGitLab:
                 url = f"https://gitlab.com/api/v4/search?scope=projects&search={payload}&per_page=100&page={page}"
 
             # GitLab API v4 "Bearer + token"
-             # TODO: handle more API tokens in case of limit
+            # TODO: handle more API tokens in case of limit
             header = {'Authorization': "Bearer " + self.token}
 
             response = SCRUtils.get_url(url, header)
@@ -126,13 +133,20 @@ class CrawlerGitLab:
         if from_keywords:
             file_name = "GitLab_kw_"
 
-        SCRUtils.export_csv(df_gitlab, "./output/", file_name + payload, True, True)
+        # Clean
+        df_gitlab_cleaned = self.preprocess.clean_dataframe(df_gitlab)
         
-        # To postgresql
-        #post = postgresql()
-        #post.upload_to_db("scr", df_gitlab)
+        if df_gitlab_cleaned.empty:
+            PrintLog.log("No VALID repos found for the given keywords in GitLab.")  
+            return df_gitlab_cleaned # empty dataframe
+
+        # Export
+        SCRUtils.export_csv(df_gitlab, "./output/", file_name + payload, True, True) 
+        # Upload
+        PrintLog.log("Upload pandas called from Github crawler: " + file_name + merged_kw)                  
+        self.elastic_end.upload_pandas(df_gitlab_cleaned)
         
-        return df_gitlab
+        return df_gitlab_cleaned
 
 
         

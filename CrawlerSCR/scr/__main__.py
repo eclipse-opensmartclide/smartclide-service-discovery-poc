@@ -23,7 +23,7 @@ from scr.api.v1 import insert_ns
 app = Flask(__name__)
 
 VERSION = (1, 0)
-AUTHOR = 'AIR - David Berrocal (@dabm-git)'
+AUTHOR = 'AIR - (@dabm-git)'
 
 namespaces = [ github_ns, gitlab_ns, bitbucket_ns, search_ns, insert_ns ]
 

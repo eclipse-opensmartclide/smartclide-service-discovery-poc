@@ -8,10 +8,14 @@ import random
 from bs4 import BeautifulSoup
 
 # own
-from scr.utils import SCRUtils
-from scr.postgresql.config import postgresql
+from scr.utils import SCRUtils, PrintLog
+from scr.elastic.elastic import elastic
+from scr.repos.clean_data import ServiceCrawledDataPreProcess
 
 class CrawlerBitbucket:
+    preprocess = ServiceCrawledDataPreProcess()
+    elastic_end = elastic()
+
     # Constructor
     def __init__(self, ptoken):
         """
@@ -69,6 +73,9 @@ class CrawlerBitbucket:
         Search for repositories in BitBucket using get requests based on the keywords given.
         The result is exported to .csv files and then loaded into a Postgre database. 
         """ 
+
+        PrintLog.log("Get BitBucket repos started: " + keywords)
+
         # https://support.atlassian.com/bitbucket-cloud/docs/api-request-limits/
         # Git web (HTTPS://) requests           60,000 requests per hour
         # Any access to /2.0/repositories/*     1,000 per hour
@@ -134,10 +141,20 @@ class CrawlerBitbucket:
         df_bitbucket_web.reset_index(drop=True, inplace=True)
 
         file_name = "Bitbucket_kw_"
-        SCRUtils.export_csv(df_bitbucket_web, "./output/", file_name + keyword_split, True, True)
+
+       
+        # Clean
+        df_bitbucket_web_cleaned = self.preprocess.clean_dataframe(df_bitbucket_web)
         
-        #post = postgresql()
-        #post.upload_to_db("scr", df_bitbucket_web)   
-        
-        #SCRUtils.upload_to_db("bitbucket", df_bitbucket_web)
+        if df_bitbucket_web_cleaned.empty:
+            PrintLog.log("No VALID repos found for the given keywords in BitBucket.")  
+            return df_bitbucket_web_cleaned # empty dataframe
+
+        # Export
+        SCRUtils.export_csv(df_bitbucket_web_cleaned, "./output/", file_name + keyword_split, True, True)
+
+        # Upload
+        PrintLog.log("Upload to elastic called from BitBucket crawler: " + file_name + keyword_split)                  
+        self.elastic_end.upload_pandas(df_bitbucket_web_cleaned)
+
         return df_bitbucket_web

@@ -14,17 +14,47 @@ from github import BadCredentialsException
 
 # own
 from scr.utils import SCRUtils, PrintLog
-from scr.postgresql.config import postgresql
+from scr.elastic.elastic import elastic
+from scr.repos.clean_data import ServiceCrawledDataPreProcess
+
+class NoReposFound(Exception):
+    pass
 
 class CrawlerGitHub:
+
+    preprocess = ServiceCrawledDataPreProcess()
+    elastic_end = elastic()
+
     # constructor
     def __init__(self, ptoken):
         """
         Creates an isntance of CrawlerGitHub using the ptoken argument.
         """
         self.token = Github(ptoken) # pygithub
+        
+    def get_from_topic(self, p_topic):
+        """
+        Parses the topic given to search for repositories in GitHub
+        """        
+        # Filter by topics? ex: api, service, rest, swagger
+        # We look for the topics
+        query = 'topic:' + p_topic
+        
+        # get github repos using a topic
+        try:
+            repos = self.token.search_repositories(query, 'stars', 'desc')
+            if (repos.totalCount != 0):
+                pass # dont limit the search here
+            else:
+                raise NoReposFound
+           
+            return self.get_repos(repos, p_topic, from_topic=True)
+        except BadCredentialsException: # GitHub Exc
+            PrintLog.log("\nGitHub Bad credentials")
+        except NoReposFound:
+            PrintLog.log("\nNo data found for that topic")
 
-    def get_from_url(self, url, get_forks):
+    def get_from_url(self, url):
         """
         Parses the URL given to search for repositories in GitHub.
         """
@@ -32,21 +62,24 @@ class CrawlerGitHub:
         # https://github.com/dabm-git/ --> [https:] [github.com] [dabm-git]
         username = re.findall("([^\/]+)", url)[-1]
 
-        # target can be user/org
-        user = self.token.get_user(username)
-        user_repos = user.get_repos()
+        try: 
+            # target can be user or an org
+            user = self.token.get_user(username)
+            user_repos = user.get_repos()
+            # Note that repos forks are not listed in the user_repos! 
+            # 
+            if (user_repos.totalCount != 0):
+                pass # dont limit the search here
+            else:
+                raise NoReposFound
 
-        # Dont get forks
-        if not get_forks:
-            non_forks = [trepo for trepo in user_repos if trepo.fork is False]
-            repos = non_forks
-        else:
-            repos = user_repos
-            # update the username for export  
-            username = username + "_+forks"
-
-        return self.get_repos(repos, username, from_url=True)
-       
+            return self.get_repos(user_repos, username, from_url=True)
+            
+        except BadCredentialsException:
+            PrintLog.log("\nGitHub Bad credentials")
+        except NoReposFound:
+            PrintLog.log("\nNo data found for that user")
+            
     def get_from_keywords(self, keywords):
         """
         Parses the keywords given to search for repositories in GitHub.
@@ -58,25 +91,37 @@ class CrawlerGitHub:
         keywords = [re.sub('[^A-Za-z0-9+]+', '', key) for key in keywords]
         keywords = '+'.join(keywords)
 
-        # We look for the keywords at the readme and the project description
-        query =  keywords + '+in:readme+in:description'
+        # We look for the keywords at the readme, the project description and name
+        query =  keywords + '+in:name+in:readme+in:description' # filter by api?
 
         # Filter by +stars
-        repos = self.token.search_repositories(query, 'stars', 'desc')
+        try:   
+            # Slice top 500 repos         
+            repos = self.token.search_repositories(query, 'stars', 'desc')
+            # check if paginated list is empty
+            if (repos.totalCount != 0):
+                repos_s = repos[:500] # In case of query is topic dont 
+            else:
+                raise NoReposFound
+           
+            return self.get_repos(repos_s, keywords, from_keywords=True)       
+         
+        except BadCredentialsException: # GitHub Exc
+            PrintLog.log("\nGitHub Bad credentials")            
+            
+        except NoReposFound:
+            PrintLog.log("\nNo data found for that query")            
+            
 
-        return self.get_repos(repos, keywords, from_keywords=True)
-
-    def get_repos(self, payload, keywords, from_url = False, from_keywords = False):
+    def get_repos(self, payload, keywords, from_url = False, from_keywords = False, from_topic = False):
         """
         Search for repositories in GitHub based on the payload given and the type of search,
         from URL or Keyword using get requests on its API.
         The result is exported to .csv files and then loaded into a Postgre database. 
         """ 
-
-        # Limited to 1k for search, need more? paginate the results :P
-        #PrintLog.log(f'Found {result.totalCount} repo(s) with the keywords',
-        #      ','.join(keywords))
-        df_github = pd.DataFrame()
+        # Note results are paginated
+        df_github = pd.DataFrame()   
+        
         df_github['full_name'] = ""
         df_github['link'] = ""
         df_github['description'] = ""
@@ -91,13 +136,15 @@ class CrawlerGitHub:
         # while True raise StopIteration
         while True:      
             try:
-                for repo in payload:    
+                for repo in payload:
+                    
                     # Make sure we have strings
                     clone_url = str(repo.clone_url)
                     description = str(repo.description)
                     stars = str(repo.stargazers_count)
                     forks = str(repo.forks_count)
                     watchers = str(repo.watchers_count)
+                    
                     # + spacer due , is used in the .csv
                     topics = '+'.join(repo.get_topics())
 
@@ -148,14 +195,27 @@ class CrawlerGitHub:
                     file_name = "GitHub_url_"
                 if from_keywords:
                     file_name = "GitHub_kw_"
-
-                SCRUtils.export_csv(df_github, "./output/", file_name + keywords, True, True) 
-                              
-                #PrintLog.log("Inserting into github postgre db: " + file_name + keywords)      
-                #post = postgresql()
-                #post.upload_to_db("scr", df_github)        
-                #SCRUtils.upload_to_db("github", df_github)
-                break
+                if from_topic:
+                    file_name = "GitHub_topic_"
+                
+                # if df_github is empty, no data found
+                if df_github.empty:
+                    PrintLog.log("No VALID repos found for the given keywords in GitHub.")
+                    break
+                else:
+                    # Clean
+                    if not from_url:               
+                        df_github_cleaned = self.preprocess.clean_dataframe(df_github)
+                    else:
+                        df_github_cleaned = df_github
+                       
+                    # Export
+                    SCRUtils.export_csv(df_github_cleaned, "./output/", file_name + keywords, True, True) 
+                    # Upload           
+                    PrintLog.log("Upload pandas called from Github crawler: " + file_name + keywords)                  
+                    self.elastic_end.upload_pandas(df_github_cleaned)
+                        
+                    break
 
             except requests.exceptions.Timeout:
                 PrintLog.log("\nRequests Timeout")
@@ -168,7 +228,7 @@ class CrawlerGitHub:
                 PrintLog.log("\nRateLimitExceededException")
                 PrintLog.log("Sleeping (1h)") 
                 # TODO: grab the wait time from API + change token?
-                time.sleep(3600)
+                time.sleep(3600) # Default docs 1h
                 pass
 
         # while loop end
