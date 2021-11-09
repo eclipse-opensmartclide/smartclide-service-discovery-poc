@@ -132,7 +132,7 @@ class CrawlerGitHub:
         df_github['updated_on'] = ""   
         df_github['keywords'] = ""
         df_github['source'] = ""
-        df_github['uuid'] = str(uuid.uuid4())
+        df_github['uuid'] = ""
 
         PrintLog.log("Get GitHub repos started: " + keywords)
         # while True raise StopIteration
@@ -175,7 +175,8 @@ class CrawlerGitHub:
                         'watchers': watchers,
                         'updated_on': updated_on,
                         'keywords': merged_kw,
-                        'source': "GitHub"
+                        'source': "GitHub",
+                        'uuid': str(uuid.uuid4())
                         }, index=[0])
 
                     df_github = df_github.append(df_temp)
