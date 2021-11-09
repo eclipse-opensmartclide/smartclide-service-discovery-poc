@@ -6,6 +6,7 @@ import re
 import pandas as pd
 import random
 from bs4 import BeautifulSoup
+import uuid
 
 # own
 from scr.utils import SCRUtils, PrintLog
@@ -126,7 +127,8 @@ class CrawlerBitbucket:
                     "forks": "-1",
                     "watchers": repo_metadata_li[0].find('a').text.strip().replace(" watchers", "").replace(" watcher", ""),
                     "keywords": keyword_split,
-                    "source": "Bitbucket"
+                    "source": "Bitbucket",
+                    "uuid" : str(uuid.uuid4())
                 }
                 # Append repo
                 data.append(datarepo)

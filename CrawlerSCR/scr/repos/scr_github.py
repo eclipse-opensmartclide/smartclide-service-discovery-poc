@@ -6,6 +6,7 @@ import pandas as pd
 import random
 import requests # requests.exceptions.Timeout
 import re
+import uuid
 
 # pygithub
 from github import Github
@@ -131,6 +132,7 @@ class CrawlerGitHub:
         df_github['updated_on'] = ""   
         df_github['keywords'] = ""
         df_github['source'] = ""
+        df_github['uuid'] = str(uuid.uuid4())
 
         PrintLog.log("Get GitHub repos started: " + keywords)
         # while True raise StopIteration

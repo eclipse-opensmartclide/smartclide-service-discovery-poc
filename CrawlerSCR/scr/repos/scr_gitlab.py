@@ -3,6 +3,7 @@
 
 import pandas as pd
 import re
+import uuid
 
 # own
 from scr.utils import SCRUtils, PrintLog
@@ -110,7 +111,8 @@ class CrawlerGitLab:
                     "updated_on": repo['last_activity_at'],
                     #"id": repo['id'],
                     "keywords": merged_kw,
-                    "source": "GitLab"
+                    "source": "GitLab",
+                    "uuid" : str(uuid.uuid4())
                 }
 
                 # Add json to data list
