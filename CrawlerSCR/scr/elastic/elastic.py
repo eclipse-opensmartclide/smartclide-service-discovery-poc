@@ -58,8 +58,8 @@ class elastic():
         for index, document in df_iter:
             yield {
                     "_index": 'scr_index', # index of crawled data
-                    "_type": "_doc", # decrapated
-                    "_id" : f"{document['full_name']}", # use the full name as id user+serviceName
+                    #"_type": "_doc", # decrapated
+                    "_id" : f"{document['uuid']}", # use the full name as id user+serviceName
                     "_source": document.to_dict(), # use a filter?
                 }    
         
