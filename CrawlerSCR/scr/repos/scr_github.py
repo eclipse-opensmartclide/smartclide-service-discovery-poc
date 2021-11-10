@@ -12,6 +12,7 @@ import uuid
 from github import Github
 from github import RateLimitExceededException
 from github import BadCredentialsException
+from github import GithubException
 
 # own
 from scr.utils import SCRUtils, PrintLog
@@ -139,7 +140,7 @@ class CrawlerGitHub:
         while True:      
             try:
                 for repo in payload:
-                    
+
                     # Make sure we have strings
                     clone_url = str(repo.clone_url)
                     description = str(repo.description)
@@ -150,10 +151,13 @@ class CrawlerGitHub:
                     # + spacer due , is used in the .csv
                     topics = '+'.join(repo.get_topics())
 
-                    # Get the commits in reverse, so [0] is the last commit
-                    # Since PaginatedList does not admit [-1]
-                    commits = repo.get_commits().reversed                    
-                    updated_on = str(commits[0].commit.author.date)
+                    try:
+                        # Get the commits in reverse, so [0] is the last commit
+                        # Since PaginatedList does not admit [-1]
+                        commits = repo.get_commits().reversed                    
+                        updated_on = str(commits[0].commit.author.date)
+                    except GithubException as e:                        
+                        continue # next repo, this one is empty
 
                     # If we have more topics, merge them with the kw
                     merged_kw = keywords                    
