@@ -1,0 +1,26 @@
+Metadata-Version: 2.1
+Name: SCR-project-API
+Version: 1.0
+Summary: Flask RESTX API for Service Code Repository Crawler
+Home-page: UNKNOWN
+Author: AIR Institute
+Author-email: dabm@usal.es
+License: Eclipse Public License 2.0
+Project-URL: Bug Reports, https://github.com/
+Project-URL: Source, https://github.com/
+Project-URL: Documentation, https://github.com/
+Keywords: scr,flask,python
+Platform: UNKNOWN
+Classifier: Development Status :: 1 - Alpha
+Classifier: Programming Language :: Python :: 3 :: Only
+Classifier: Programming Language :: Python :: 3.5
+Classifier: Programming Language :: Python :: 3.6
+Classifier: Programming Language :: Python :: 3.7
+Classifier: Programming Language :: Python :: 3.8
+Classifier: License :: OSI Approved :: Eclipse Public License 2.0
+Classifier: Intended Audience :: Developers
+Requires-Python: >=3
+Description-Content-Type: text/markdown
+
+# Eclipse Public License 2.0
+

@@ -1,0 +1,3 @@
+[console_scripts]
+scr = scr.run:main
+
