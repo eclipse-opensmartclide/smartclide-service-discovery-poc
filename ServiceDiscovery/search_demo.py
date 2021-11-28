@@ -6,18 +6,22 @@
 import requests
 import json
 
-demo_json = {
+demo_json ={
     "full_name": {
-        "0": "Dabm"
+        "0": "django"
     },
     "description": {
-        "0": "Random service for search"
+        "0": "API support for Django REST framework"
+    },
+    "keyword": {
+        "0": "django"
     }
 }
 
-url = 'url'
+json_data = json.dumps(demo_json)
+
+url = 'http://18.185.35.23:2020'
 uri = url + '/servicediscovery/v1/service_search'
 
-res = requests.post(uri, json = demo_json) # demo_json2
-if res.ok:
-    print(res.json())
+res = requests.post(uri, json = json_data) # demo_json2
+print(res.json())
