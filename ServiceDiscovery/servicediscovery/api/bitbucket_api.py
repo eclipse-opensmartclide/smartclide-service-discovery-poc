@@ -6,15 +6,15 @@ import json
 from flask_restx import Resource
 
 # scr API
-from servicediscovery.api.v1 import api
-from servicediscovery.core import cache, limiter
-from servicediscovery.utils import FlaskUtils
+from api.v1 import api
+from core import cache, limiter
+from utils import FlaskUtils
+from config import ServiceDiscoeryConfig
 
 # bitbucket
-from servicediscovery.config import ServiceDiscoeryConfig
-from servicediscovery.api.models.bitbucket_model import bitbucket_model
-from servicediscovery.api.parsers.bitbucket_parser import bitbucket_argument_parser
-from servicediscovery.repos.scr_bitbucket import CrawlerBitbucket
+from api.models.bitbucket_model import bitbucket_model
+from api.parsers.bitbucket_parser import bitbucket_argument_parser
+from repos.scr_bitbucket import CrawlerBitbucket
 
 bitbucket_ns = api.namespace('crawl_bitbucket', description='Crawler Bitbucket')
 

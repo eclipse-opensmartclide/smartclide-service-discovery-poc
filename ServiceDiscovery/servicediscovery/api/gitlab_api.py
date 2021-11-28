@@ -5,15 +5,15 @@ import json
 
 from flask_restx import Resource
 
-from servicediscovery.api.v1 import api
-from servicediscovery.core import cache, limiter
-from servicediscovery.utils import FlaskUtils
+from api.v1 import api
+from core import cache, limiter
+from utils import FlaskUtils
+from config import ServiceDiscoeryConfig
 
 # gitlab
-from servicediscovery.config import ServiceDiscoeryConfig
-from servicediscovery.api.models.gitlab_model import gitlab_model
-from servicediscovery.api.parsers.gitlab_parser import gitlab_argument_parser
-from servicediscovery.repos.scr_gitlab import CrawlerGitLab
+from api.models.gitlab_model import gitlab_model
+from api.parsers.gitlab_parser import gitlab_argument_parser
+from repos.scr_gitlab import CrawlerGitLab
 
 gitlab_ns = api.namespace('crawl_gitlab', description='Crawler GitLab')
 

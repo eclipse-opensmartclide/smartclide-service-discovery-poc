@@ -5,15 +5,16 @@ import json
 
 from flask_restx import Resource
 
-from servicediscovery.api.v1 import api
-from servicediscovery.core import cache, limiter
-from servicediscovery.utils import FlaskUtils
+# scr API
+from api.v1 import api
+from core import cache, limiter
+from utils import FlaskUtils
+from config import ServiceDiscoeryConfig
 
 # github
-from servicediscovery.config import ServiceDiscoeryConfig
-from servicediscovery.api.models.github_model import github_model
-from servicediscovery.api.parsers.github_parser import github_argument_parser
-from servicediscovery.repos.scr_github import CrawlerGitHub
+from api.models.github_model import github_model
+from api.parsers.github_parser import github_argument_parser
+from repos.scr_github import CrawlerGitHub
 
 github_ns = api.namespace('crawl_github', description='Crawler GitHub')
 

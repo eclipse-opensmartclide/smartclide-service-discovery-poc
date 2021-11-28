@@ -15,7 +15,7 @@ from github import BadCredentialsException
 from github import GithubException
 
 # own
-from servicediscovery.utils import SCRUtils, PrintLog
+from utils import SCRUtils, PrintLog
 from servicediscovery.elastic.elasticsearch import Elastic
 from servicediscovery.repos.clean_data import ServiceCrawledDataPreProcess
 

@@ -4,9 +4,9 @@
 from flask import request
 from flask_restx import Resource
 
-from servicediscovery.api.v1 import api
-from servicediscovery.core import cache, limiter
-from servicediscovery.elastic.elasticsearch import Elastic
+from api.v1 import api
+from core import cache, limiter
+from elastic.elasticsearch import Elastic
 
 search_ns = api.namespace('service_search', description='Search for a service in the registry')
 @search_ns.route('', methods = ['POST']) # url/user
@@ -18,6 +18,9 @@ class GetStatus(Resource):
     def post(self):
         if request.method == 'POST':
             data = request.json
+
+            if data is None:
+                return {'message': 'Empty POST content'}, 400
           
             # validate data
             if 'query' not in data:

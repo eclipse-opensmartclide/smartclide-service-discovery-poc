@@ -7,7 +7,7 @@ from elasticsearch import helpers
 from configparser import ConfigParser
 import json
 
-from servicediscovery.utils import PrintLog
+from utils import PrintLog
 
 class Elastic():
 

@@ -6,8 +6,9 @@ class FlaskConfig():
 	PORT = 2020
 	HOST = '0.0.0.0'
 	URL_PREFIX = '/servicediscovery/v1'
-	DEBUG_MODE = False
-	USE_HTTPS = DEBUG_MODE
+	# NOTE: namesapce is not available in debug mode, you must specify the namespace servicediscovery
+	DEBUG_MODE = False 
+	USE_HTTPS = False
 	SSL_KEY = './certs/server.key'
 	SSL_CERT = './certs/server.crt'
 

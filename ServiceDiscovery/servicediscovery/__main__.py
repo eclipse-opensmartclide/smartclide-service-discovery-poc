@@ -8,17 +8,17 @@ import ssl
 import logging
 
 # own
-from servicediscovery.config import FlaskConfig
-from servicediscovery.api.v1 import api
-from servicediscovery.core import cache, limiter
-from servicediscovery.utils import PrintLog
+from config import FlaskConfig
+from api.v1 import api
+from core import cache, limiter
+from utils import PrintLog
 
 # namespaces
-from servicediscovery.api.github_api import github_ns
-from servicediscovery.api.gitlab_api import gitlab_ns
-from servicediscovery.api.bitbucket_api import bitbucket_ns
-from servicediscovery.api.search_api import search_ns
-from servicediscovery.api.v1 import insert_ns
+from api.github_api import github_ns
+from api.gitlab_api import gitlab_ns
+from api.bitbucket_api import bitbucket_ns
+from api.search_api import search_ns
+from api.v1 import insert_ns
 
 app = Flask(__name__)
 

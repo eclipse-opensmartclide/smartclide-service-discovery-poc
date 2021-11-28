@@ -7,8 +7,8 @@ from flask import request
 import pandas as pd
 from io import StringIO
 
-from servicediscovery.core import cache, limiter
-from servicediscovery.elastic.elasticsearch import Elastic
+from core import cache, limiter
+from elastic.elasticsearch import Elastic
 
 api = Api(version='1.0',
 		  title='Service Discovery API',
@@ -22,12 +22,17 @@ class GetStatus(Resource):
     @api.response(404, 'Data not found')
     @api.response(500, 'Unhandled errors')
     @api.response(400, 'Invalid parameters')
+    @api.doc(params={ 'id': 'Specify the Id associated with the person' })
     def post(self):
         if request.method != 'POST':      
             return
 
         # get data from POST
         content = request.json
+
+        # check if content is empty
+        if content is None:
+            return {'message': 'Empty POST content'}, 400
         
         # try to convert the data to a dataframe
         try:

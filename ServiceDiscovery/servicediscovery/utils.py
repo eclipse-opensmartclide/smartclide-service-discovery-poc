@@ -9,7 +9,6 @@ import logging
 #  a random User-Agent is selected from the list useragents.txt (inside the requests_random_user_agent package)
 import requests_random_user_agent
 
-
 class PrintLog():
     def log(text):
         """
