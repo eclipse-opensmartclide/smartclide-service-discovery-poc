@@ -1,6 +1,7 @@
 #!flask/bin/python
 # Eclipse Public License 2.0
 
+import json
 from flask import request
 from flask_restx import Resource
 
@@ -19,13 +20,14 @@ class GetStatus(Resource):
         if request.method == 'POST':
             data = request.json
 
+            try:
+                json.loads(data)
+            except TypeError:
+                return 'Invalid parameter format, only JSON is acepted', 400
+
             if data is None:
                 return {'message': 'Empty POST content'}, 400
-          
-            # validate data
-            if 'query' not in data:
-                return {'message': 'Missing query'}, 400
             
-
+            # The validation is done in the Elastic class
             l_elastic = Elastic()
             return  l_elastic.search(data)
