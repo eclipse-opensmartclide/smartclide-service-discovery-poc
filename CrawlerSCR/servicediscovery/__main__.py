@@ -8,22 +8,22 @@ import ssl
 import logging
 
 # own
-from scr.config import FlaskConfig
-from scr.api.v1 import api
-from scr.core import cache, limiter
-from scr.utils import PrintLog
+from servicediscovery.config import FlaskConfig
+from servicediscovery.api.v1 import api
+from servicediscovery.core import cache, limiter
+from servicediscovery.utils import PrintLog
 
 # namespaces
-from scr.api.github_api import github_ns
-from scr.api.gitlab_api import gitlab_ns
-from scr.api.bitbucket_api import bitbucket_ns
-from scr.api.search_api import search_ns
-from scr.api.v1 import insert_ns
+from servicediscovery.api.github_api import github_ns
+from servicediscovery.api.gitlab_api import gitlab_ns
+from servicediscovery.api.bitbucket_api import bitbucket_ns
+from servicediscovery.api.search_api import search_ns
+from servicediscovery.api.v1 import insert_ns
 
 app = Flask(__name__)
 
 VERSION = (1, 0)
-AUTHOR = 'AIR - (@dabm-git)'
+AUTHOR = 'AIR - (dabm@air-institute.org)'
 
 namespaces = [ github_ns, gitlab_ns, bitbucket_ns, search_ns, insert_ns ]
 
@@ -70,7 +70,7 @@ def initialize_app(flask_app):
              
 def main():
     # logging
-    logging.basicConfig(handlers=[logging.FileHandler(filename='scr_api.log', 
+    logging.basicConfig(handlers=[logging.FileHandler(filename='servicediscovery_api.log', 
                             encoding='utf-8')],
                             level=logging.INFO, # level=logging.INFO
                             format='%(asctime)s %(message)s', 

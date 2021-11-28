@@ -6,9 +6,9 @@ import re
 import uuid
 
 # own
-from scr.utils import SCRUtils, PrintLog
-from scr.elastic.elasticsearch import Elastic
-from scr.repos.clean_data import ServiceCrawledDataPreProcess
+from servicediscovery.utils import SCRUtils, PrintLog
+from servicediscovery.elastic.elasticsearch import Elastic
+from servicediscovery.repos.clean_data import ServiceCrawledDataPreProcess
 
 class CrawlerGitLab:
 
@@ -108,8 +108,7 @@ class CrawlerGitLab:
                     "stars": repo['star_count'],                 
                     "forks": repo['forks_count'],
                     "watchers": "-1",           
-                    "updated_on": repo['last_activity_at'],
-                    #"id": repo['id'],
+                    "updated_on": repo['last_activity_at'],                    
                     "keywords": merged_kw,
                     "source": "GitLab",
                     "uuid" : str(uuid.uuid4())

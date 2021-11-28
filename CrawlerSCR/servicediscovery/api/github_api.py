@@ -5,15 +5,15 @@ import json
 
 from flask_restx import Resource
 
-from scr.api.v1 import api
-from scr.core import cache, limiter
-from scr.utils import FlaskUtils
+from servicediscovery.api.v1 import api
+from servicediscovery.core import cache, limiter
+from servicediscovery.utils import FlaskUtils
 
 # github
-from scr.config import SCRConfig
-from scr.api.models.github_model import github_model
-from scr.api.parsers.github_parser import github_argument_parser
-from scr.repos.scr_github import CrawlerGitHub
+from servicediscovery.config import ServiceDiscoeryConfig
+from servicediscovery.api.models.github_model import github_model
+from servicediscovery.api.parsers.github_parser import github_argument_parser
+from servicediscovery.repos.scr_github import CrawlerGitHub
 
 github_ns = api.namespace('crawl_github', description='Crawler GitHub')
 
@@ -61,7 +61,7 @@ class GetGitHubRepos(Resource):
         # retrieve repos
         try:
             # TODO: handle more API tokens in case of limit
-            github = CrawlerGitHub(SCRConfig.GITHUB_ACCESS_TOKEN_1)            
+            github = CrawlerGitHub(ServiceDiscoeryConfig.GITHUB_ACCESS_TOKEN_1)            
             if is_from_url:                
                 r = github.get_from_url(from_url)
             if is_from_keyword:                

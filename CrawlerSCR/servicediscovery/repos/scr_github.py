@@ -15,9 +15,9 @@ from github import BadCredentialsException
 from github import GithubException
 
 # own
-from scr.utils import SCRUtils, PrintLog
-from scr.elastic.elasticsearch import Elastic
-from scr.repos.clean_data import ServiceCrawledDataPreProcess
+from servicediscovery.utils import SCRUtils, PrintLog
+from servicediscovery.elastic.elasticsearch import Elastic
+from servicediscovery.repos.clean_data import ServiceCrawledDataPreProcess
 
 class NoReposFound(Exception):
     pass
@@ -169,7 +169,7 @@ class CrawlerGitHub:
                     name = re.findall("([^/]*)$", str(clone_url))
                     full_name = name[0].replace('.git', '')
                     
-                    # Build the dataframe
+                    # Build the dataframe TODO: change to dict so bitbucket and github are the same  df_temp = {  }
                     df_temp = pd.DataFrame({                        
                         'full_name': full_name,
                         'description': description,

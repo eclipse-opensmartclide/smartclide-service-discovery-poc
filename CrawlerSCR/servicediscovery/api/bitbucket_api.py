@@ -6,15 +6,15 @@ import json
 from flask_restx import Resource
 
 # scr API
-from scr.api.v1 import api
-from scr.core import cache, limiter
-from scr.utils import FlaskUtils
+from servicediscovery.api.v1 import api
+from servicediscovery.core import cache, limiter
+from servicediscovery.utils import FlaskUtils
 
 # bitbucket
-from scr.config import SCRConfig
-from scr.api.models.bitbucket_model import bitbucket_model
-from scr.api.parsers.bitbucket_parser import bitbucket_argument_parser
-from scr.repos.scr_bitbucket import CrawlerBitbucket
+from servicediscovery.config import ServiceDiscoeryConfig
+from servicediscovery.api.models.bitbucket_model import bitbucket_model
+from servicediscovery.api.parsers.bitbucket_parser import bitbucket_argument_parser
+from servicediscovery.repos.scr_bitbucket import CrawlerBitbucket
 
 bitbucket_ns = api.namespace('crawl_bitbucket', description='Crawler Bitbucket')
 
@@ -57,7 +57,7 @@ class GetBitbucketRepos(Resource):
 
         # retrieve repos
         try:
-            bitbucket = CrawlerBitbucket(SCRConfig.BITBUCKET_ACCESS_TOKEN_1)
+            bitbucket = CrawlerBitbucket(ServiceDiscoeryConfig.BITBUCKET_ACCESS_TOKEN_1)
             # TODO: param forks
             if is_from_url:                
                 #r = bitbucket.get_from_url(from_url, get_forks=False)

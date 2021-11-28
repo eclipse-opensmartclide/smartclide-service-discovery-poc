@@ -1,14 +1,13 @@
 #!/usr/bin/python3
 # Eclipse Public License 2.0
 
-from configparser import ConfigParser
-
-from scr.utils import PrintLog
 import pandas as pd
 from elasticsearch import Elasticsearch
 from elasticsearch import helpers
 from configparser import ConfigParser
 import json
+
+from servicediscovery.utils import PrintLog
 
 class Elastic():
 
@@ -20,7 +19,7 @@ class Elastic():
     def __configure_elastic(self):
         # connect to elasticserach        
         config = self.__config()
-        PrintLog.log('[elastic] Connecting to the Elasticsearch database...')
+        PrintLog.log('[elastic] Connecting to Elasticsearch.')
     
         return Elasticsearch(
              [config['host']+ ':' + config['port']],
@@ -65,7 +64,8 @@ class Elastic():
         
     def upload_pandas(self, pd_to_up):                
         # Upload to elastic the cleaned pandas using helpers bulk and doc_generator
-        PrintLog.log('[elastic] Uploading pandas using bulk and doc_generator.')           
+        PrintLog.log('[elastic] Uploading pandas using bulk and doc_generator.')  
+                 
         helpers.bulk(self.elastic, self.__doc_generator(pd_to_up))
 
     def search(self, json_data):                
@@ -77,21 +77,21 @@ class Elastic():
         
         # To daraframe, this step is not necessary since we can acces the json directly
         query_dataframe = pd.DataFrame.from_dict(json_query)
-        
+
+        # TODO: Use DLE to classify the query to get the right keywords
         # Build query
-        query = query_dataframe["full_name"][0] + " OR "+  query_dataframe["description"][0] + " OR " + query_dataframe["keywords"][0]
+        query = query_dataframe["full_name"][0] + " OR " +  query_dataframe["description"][0] # + " OR " + query_dataframe["keywords"][0]
         
         query_body ={
             "query": {
                 "query_string" : {
-                "fields" : ["description", "full_name", "keywords"],
+                "fields" : ["description", "full_name"], #"keywords"],
                 "query" : query,
                 }
             }
         }        
         # The actual search in the scr index
-        result = self.elastic.search(index="scr", body=query_body)
-        # TODO serach in other indexes
+        result = self.elastic.search(index="scr_index", body=query_body) # scr_index
 
         # Filter by hits
         all_hits = result['hits']['hits']

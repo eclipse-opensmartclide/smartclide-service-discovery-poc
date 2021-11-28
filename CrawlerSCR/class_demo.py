@@ -1,7 +1,7 @@
 #!/usr/bin/python3
 # Eclipse Public License 2.0
 
-# Classification data. POST
+# Classification data demo - POST TO DLE API
 
 import requests
 
@@ -19,7 +19,8 @@ head_nocache = {
     "Pragma": "no-cache"
 }
 
-uri = 'URI'
+url = 'url'
+uri = url + '/servicediscovery/v1/service_search'
 
 res = requests.post(uri, json = demo_json, headers= head_nocache) # demo_json2
 if res.ok:

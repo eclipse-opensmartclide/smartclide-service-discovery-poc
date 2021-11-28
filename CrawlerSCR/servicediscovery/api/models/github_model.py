@@ -3,7 +3,7 @@
 
 from flask_restx import fields
 
-from scr.api.v1 import api
+from servicediscovery.api.v1 import api
 
 github_model = api.model("GitHub model", {
     'from_url': fields.String(example='https://github.com/dabm-git', description='Url of a user or organization'),

@@ -42,18 +42,12 @@ class SCRUtils():
         Function to export a DataFrame in the path, with a name + timestamp, and export index and/or header
         """
         # Try?
-        df.to_csv(
-            path + 
-            name + 
-            '_' 
-            + datetime.now().strftime('%d_%m_%Y') 
-            + '.csv',
+        df.to_csv(path + name + '_' + datetime.now().strftime('%d_%m_%Y') + '.csv',
             index=export_index,
             header=export_header)
-    
-    
+# flask errors    
 class FlaskUtils():
-    # flask
+
     def handle400error(ns, message):
         """
         Function to handle a 400 (bad arguments code) error.

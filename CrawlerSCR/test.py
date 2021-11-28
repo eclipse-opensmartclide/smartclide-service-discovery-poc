@@ -1,12 +1,12 @@
 #!/usr/bin/python3
 # Eclipse Public License 2.0
 
-from scr.config import SCRConfig
-from scr.utils import SCRUtils
+from servicediscovery.config import SCRConfig
+from servicediscovery.utils import SCRUtils
 
-from scr.repos.scr_github import CrawlerGitHub
-from scr.repos.scr_gitlab import CrawlerGitLab
-from scr.repos.scr_bitbucket import CrawlerBitbucket
+from servicediscovery.repos.scr_github import CrawlerGitHub
+from servicediscovery.repos.scr_gitlab import CrawlerGitLab
+from servicediscovery.repos.scr_bitbucket import CrawlerBitbucket
 
 # Remote call
 import requests

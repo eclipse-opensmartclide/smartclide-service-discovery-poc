@@ -9,9 +9,9 @@ from bs4 import BeautifulSoup
 import uuid
 
 # own
-from scr.utils import SCRUtils, PrintLog
-from scr.elastic.elasticsearch import Elastic
-from scr.repos.clean_data import ServiceCrawledDataPreProcess
+from servicediscovery.utils import SCRUtils, PrintLog
+from servicediscovery.elastic.elasticsearch import Elastic
+from servicediscovery.repos.clean_data import ServiceCrawledDataPreProcess
 
 class CrawlerBitbucket:
     preprocess = ServiceCrawledDataPreProcess()
@@ -119,16 +119,16 @@ class CrawlerBitbucket:
                 # Todo: handle empty
                 # json datarepo
                 datarepo = {
-                    "full_name": repo.find('a', {"class": "repo-link"}, href=True).text,
+                    "full_name": repo.find('a', {"class": "repo-link"}, href=True).text, # get repo name
                     "description": description,
-                    "link": "https://bitbucket.org" + repo.find('a', {"class": "repo-link"}, href=True)['href'],
-                    "updated_on": repo_metadata_li[1].find('time')['datetime'],
+                    "link": "https://bitbucket.org" + repo.find('a', {"class": "repo-link"}, href=True)['href'],  
                     "stars": "-1",                 
                     "forks": "-1",
                     "watchers": repo_metadata_li[0].find('a').text.strip().replace(" watchers", "").replace(" watcher", ""),
+                    "updated_on": repo_metadata_li[1].find('time')['datetime'],
                     "keywords": keyword_split,
                     "source": "Bitbucket",
-                    "uuid" : str(uuid.uuid4())
+                    "uuid" : str(uuid.uuid4()),                      
                 }
                 # Append repo
                 data.append(datarepo)

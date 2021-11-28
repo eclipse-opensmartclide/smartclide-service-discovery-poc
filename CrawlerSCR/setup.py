@@ -14,7 +14,7 @@ def read_requeriments_file(filename):
             yield line.strip()
 
 setup(
-    name='SCR project API',
+    name='Service Discovery API',
     version='1.0',
     packages=find_packages(),
     url='',
@@ -22,23 +22,24 @@ setup(
     license='Eclipse Public License 2.0',
     author='AIR Institute',
     author_email='dabm@usal.es',
-    description='Flask RESTX API for Service Code Repository Crawler',
+    description='Flask RESTX API for Service Discovery',
     long_description=readme(),
     long_description_content_type='text/markdown',
     install_requires=list(read_requeriments_file('requirements.txt')),
     entry_points={
         'console_scripts': [
-            'scr=scr.run:main'
+            'servicediscovery=servicediscovery.run:main'
         ],
     },
     include_package_data=True,
     classifiers=[
-        "Development Status :: 1 - Alpha",
+        "Development Status :: 1.0 - Alpha",
         "Programming Language :: Python :: 3 :: Only",
         "Programming Language :: Python :: 3.5",
         "Programming Language :: Python :: 3.6",
         "Programming Language :: Python :: 3.7",
         "Programming Language :: Python :: 3.8",
+        "Programming Language :: Python :: 3.9",
         "License :: OSI Approved :: Eclipse Public License 2.0",
         "Intended Audience :: Developers"
     ],

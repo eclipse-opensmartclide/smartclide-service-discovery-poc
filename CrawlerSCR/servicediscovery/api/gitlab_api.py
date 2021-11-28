@@ -5,15 +5,15 @@ import json
 
 from flask_restx import Resource
 
-from scr.api.v1 import api
-from scr.core import cache, limiter
-from scr.utils import FlaskUtils
+from servicediscovery.api.v1 import api
+from servicediscovery.core import cache, limiter
+from servicediscovery.utils import FlaskUtils
 
 # gitlab
-from scr.config import SCRConfig
-from scr.api.models.gitlab_model import gitlab_model
-from scr.api.parsers.gitlab_parser import gitlab_argument_parser
-from scr.repos.scr_gitlab import CrawlerGitLab
+from servicediscovery.config import ServiceDiscoeryConfig
+from servicediscovery.api.models.gitlab_model import gitlab_model
+from servicediscovery.api.parsers.gitlab_parser import gitlab_argument_parser
+from servicediscovery.repos.scr_gitlab import CrawlerGitLab
 
 gitlab_ns = api.namespace('crawl_gitlab', description='Crawler GitLab')
 
@@ -57,7 +57,7 @@ class GetGitLabRepos(Resource):
 
         # retrieve repos
         try:
-            gitlab = CrawlerGitLab(SCRConfig.GITLAB_ACCESS_TOKEN_1)
+            gitlab = CrawlerGitLab(ServiceDiscoeryConfig.GITLAB_ACCESS_TOKEN_1)
             
             if is_from_url:                
                 r = gitlab.get_from_url(from_url)
