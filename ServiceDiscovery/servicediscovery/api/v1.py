@@ -6,13 +6,14 @@ from flask_restx import Resource
 from flask import request
 import pandas as pd
 from io import StringIO
+import json
 
 from core import cache, limiter
 from elastic.elasticsearch import Elastic
 
 api = Api(version='1.0',
-		  title='Service Discovery API',
-		  description="** Service Discovery Flask RESTX API **")
+          title='Service Discovery API',
+          description="** Service Discovery Flask RESTX API **")
 
 insert_ns = api.namespace('service_insert', description='Insert a new service to the registry')
 @insert_ns.route('', methods = ['POST']) # url/user
@@ -33,24 +34,32 @@ class GetStatus(Resource):
         # check if content is empty
         if content is None:
             return {'message': 'Empty POST content'}, 400
-        
+
+        # check if content is valid JSON
+        try:
+            json.loads(content)
+        except TypeError:
+            return 'Invalid parameter format, only JSON is acepted', 400
+
+
         # try to convert the data to a dataframe
         try:
-            df = pd.read_csv(StringIO(content))
+            df = pd.json_normalize(json.loads(content))
         except:
             return "Invalid data format", 400
 
+        # remove .0 from the colum names
+        df.columns = [col.replace('.0', '') for col in df.columns]
+        
         # check if df have the right columns and the content of any is not empty
-        if not df.empty and df.columns.tolist() == ['full_name', 'description', 'link', 'stars', 'forks', 'watchers', 'updated_on', 'keywords', 'source', 'uuid']:
-            for index, row in df.iterrows():
-                if not row['full_name'] or not row['description'] or not row['link'] or not row['stars'] or not row['forks'] or not row['watchers'] or not row['updated_on'] or not row['keywords'] or not row['source'] or not row['uuid']:
-                    return 'Invalid data, missing values in some columns', 400
+        if not set(['full_name', 'link', 'stars', 'forks', 'watchers', 'updated_on', 'keywords', 'source', 'uuid']).issubset(df.columns):
+            return "Invalid data format, the inserted columns are not correct to perform an insertion, check that all columns have data.", 400
 
+        # TODO: check if the content of the colunms is not empty
 
         # convert df.source to lowercase
         df['source'] = df['source'].str.lower()
   
-        
         # check the source of the dataframe
         if df.source.str.contains('github').any() or df.source.str.contains('bitbucket').any() or df.source.str.contains('gitlab').any():
             return 'Invalid data, source must not be github or bitbucket or gitlab', 400
@@ -59,6 +68,7 @@ class GetStatus(Resource):
         # insert data to elastic
         Elastic().upload_pandas(df)
         # export data to csv usin the file name full_name from the dataframe df
-        df.to_csv(f'output/up_{df.full_name}.csv', index=False)
+
+        df.to_csv('output/SmartCLIDE_insert_' + df['full_name'][0] + '.csv', index=False)
        
         return 'Data inserted', 200
