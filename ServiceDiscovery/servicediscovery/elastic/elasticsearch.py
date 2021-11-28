@@ -72,7 +72,7 @@ class Elastic():
         # Upload to elastic the cleaned pandas using helpers bulk and doc_generator
         PrintLog.log('[elastic] Searching in elastic.')
 
-        # Normalize json
+        # Normalize json        
         json_query = json.loads(json_data)
         
         # To daraframe, this step is not necessary since we can acces the json directly
