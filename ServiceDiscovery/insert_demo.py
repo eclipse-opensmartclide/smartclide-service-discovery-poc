@@ -43,13 +43,12 @@ demo_json ={
 # convert demo_json to json
 json_data = json.dumps(demo_json)
 
-# convet  demo_json to dataframe
 head_nocache = {
     "Cache-Control": "no-cache",
     "Pragma": "no-cache"
 }
 
-url = 'http://18.185.35.23:2020'
+url = 'http://smartclide.ddns.net:2020'
 uri = url + '/servicediscovery/v1/service_insert'
 
 res = requests.post(uri, json = json_data, headers= head_nocache) # demo_json2
