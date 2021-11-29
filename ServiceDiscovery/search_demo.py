@@ -12,15 +12,12 @@ demo_json ={
     },
     "description": {
         "0": "API support for Django REST framework"
-    },
-    "keyword": {
-        "0": "django"
     }
 }
 
 json_data = json.dumps(demo_json)
 
-url = 'http://18.185.35.23:2020'
+url = 'http://smartclide.ddns.net:2020'
 uri = url + '/servicediscovery/v1/service_search'
 
 res = requests.post(uri, json = json_data) # demo_json2
