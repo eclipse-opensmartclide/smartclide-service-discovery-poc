@@ -1,0 +1,10 @@
+version: '3'
+
+services:
+  service_discovery:
+    restart: unless-stopped
+    build: .
+    working_dir: /app/smartclide-service-discovery-poc/ServiceDiscovery
+    command: python3 servicediscovery
+    ports:
+      - "2020:2020"
