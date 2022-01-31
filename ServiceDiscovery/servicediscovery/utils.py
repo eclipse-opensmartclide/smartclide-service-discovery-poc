@@ -4,10 +4,25 @@
 from datetime import datetime, time
 import requests
 import logging
+from configparser import ConfigParser
 
 # User-Agents are randomized per-session or per-request.
 #  a random User-Agent is selected from the list useragents.txt (inside the requests_random_user_agent package)
 import requests_random_user_agent
+
+
+class ConfigReader():
+    def read_config(section, filename='config.ini'):
+        """
+        Function for parsing the configuration file of the elasticsearch
+        """  
+        parser = ConfigParser()
+        parser.read(filename)     
+        if not parser.has_section(section):
+            raise Exception('Section {0} not found in the {1} file'.format(section, filename))
+
+        params = parser.items(section)
+        return {param[0]: param[1] for param in params}
 
 class PrintLog():
     def log(text):

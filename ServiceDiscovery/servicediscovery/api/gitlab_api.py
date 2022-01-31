@@ -78,6 +78,5 @@ class GetGitLabRepos(Resource):
         if not r_json:
             return FlaskUtils.handle404error(gitlab_ns, 'No GitLab repos was found for the given parameters.')
         
-        # TODO: Shdl we return the raw repos found or the info about them? EX: found 39 new repos, inserted into the database ok.
-        
+        # TODO: Shdl we return the raw repos found or the info about them? EX: found 39 new repos, inserted into the database ok.        
         return r_json

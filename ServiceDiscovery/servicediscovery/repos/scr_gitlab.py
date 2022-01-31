@@ -1,6 +1,8 @@
 #!/usr/bin/python3
 # Eclipse Public License 2.0
 
+import time
+import random
 import pandas as pd
 import re
 import uuid
@@ -117,6 +119,9 @@ class CrawlerGitLab:
                 # Add json to data list
                 data.append(datarepo)
 
+                # Random delay to avoid requests timeout
+                time.sleep(random.uniform(0.1, 0.3))
+
             # More pages with same keyword?
             if ('X-Next-Page' not in headers) or not headers['X-Next-Page']:
                 w_flag = False
@@ -126,7 +131,16 @@ class CrawlerGitLab:
         # While end
         # Create dataframe from json list & export one csv per keyword
         df_gitlab = pd.json_normalize(data=data)
+        del data
         df_gitlab.reset_index(drop=True, inplace=True)
+
+        # Clean
+        df_gitlab_cleaned = self.preprocess.clean_dataframe(df_gitlab)
+        del df_gitlab
+
+        if df_gitlab_cleaned.empty:
+            PrintLog.log("No VALID repos found for the given keywords in GitLab.")  
+            return df_gitlab_cleaned # empty dataframe
 
         file_name = "GitLab_"
         if from_url:
@@ -134,17 +148,10 @@ class CrawlerGitLab:
         if from_keywords:
             file_name = "GitLab_kw_"
 
-        # Clean
-        df_gitlab_cleaned = self.preprocess.clean_dataframe(df_gitlab)
-        
-        if df_gitlab_cleaned.empty:
-            PrintLog.log("No VALID repos found for the given keywords in GitLab.")  
-            return df_gitlab_cleaned # empty dataframe
-
         # Export
-        SCRUtils.export_csv(df_gitlab, "./output/", file_name + payload, True, True) 
+        SCRUtils.export_csv(df_gitlab_cleaned, "./output/", file_name + payload, True, True) 
         # Upload
-        PrintLog.log("Upload pandas called from Github crawler: " + file_name + merged_kw)                  
+        PrintLog.log("Upload pandas called from GitLab crawler: " + file_name + merged_kw)                  
         self.elastic_end.upload_pandas(df_gitlab_cleaned)
         
         return df_gitlab_cleaned

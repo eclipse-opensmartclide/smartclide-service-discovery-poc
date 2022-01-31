@@ -41,7 +41,6 @@ class GetStatus(Resource):
         except TypeError:
             return 'Invalid parameter format, only JSON is acepted', 400
 
-
         # try to convert the data to a dataframe
         try:
             df = pd.json_normalize(json.loads(content))
@@ -62,9 +61,8 @@ class GetStatus(Resource):
   
         # check the source of the dataframe
         if df.source.str.contains('github').any() or df.source.str.contains('bitbucket').any() or df.source.str.contains('gitlab').any():
-            return 'Invalid data, source must not be github or bitbucket or gitlab', 400
+            return 'Invalid data source, source must not be github or bitbucket or gitlab', 400
     
-
         # insert data to elastic
         Elastic().upload_pandas(df)
         # export data to csv usin the file name full_name from the dataframe df

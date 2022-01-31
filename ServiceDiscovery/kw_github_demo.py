@@ -1,18 +1,13 @@
 #!/usr/bin/python3
 # Eclipse Public License 2.0
 
-from servicediscovery.config import SCRConfig
-from servicediscovery.utils import SCRUtils
-
-from servicediscovery.repos.scr_github import CrawlerGitHub
-from servicediscovery.repos.scr_gitlab import CrawlerGitLab
-from servicediscovery.repos.scr_bitbucket import CrawlerBitbucket
 
 # Remote call
 import requests
 import json
 import pandas as pd    
 import concurrent.futures
+import datetime
 
 class RemoteKWGithub:
 	def get_keywords(self, file):
@@ -45,11 +40,12 @@ class RemoteKWGithub:
 			# Todo union the dataframe generated in the API call
 			for result in concurrent.futures.as_completed(tasks):
 				data = data.append(result.result(), ignore_index=True)
-                
-		SCRUtils.export_csv(data, "./", "merged", True, True)
+    
 		return data
 
 if __name__ == '__main__':
-
 	githubia = RemoteKWGithub()
-	print(githubia.remote_github_kw_from_file("atest.txt"))
+	data = githubia.remote_github_kw_from_file("test.txt")
+	print(data)
+	# Export to csv
+	data.to_csv("./" +  "merged" + '_' + datetime.now().strftime('%d_%m_%Y') + '.csv',	index=True,	header=True)

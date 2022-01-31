@@ -41,17 +41,15 @@ class CrawlerGitHub:
         # Filter by topics? ex: api, service, rest, swagger
         # We look for the topics
         query = 'topic:' + p_topic
-        
+
         # get github repos using a topic
         try:
             repos = self.token.search_repositories(query, 'stars', 'desc')
-            if (repos.totalCount != 0):
-                pass # dont limit the search here
-            else:
+            if repos.totalCount == 0:
                 raise NoReposFound
-           
             return self.get_repos(repos, p_topic, from_topic=True)
-        except BadCredentialsException: # GitHub Exc
+
+        except BadCredentialsException:
             PrintLog.log("\nGitHub Bad credentials")
         except NoReposFound:
             PrintLog.log("\nNo data found for that topic")
@@ -60,7 +58,7 @@ class CrawlerGitHub:
         """
         Parses the URL given to search for repositories in GitHub.
         """
-        # find all the text bwt / and get the last [-1] the org/user
+        # find all the text btw / and get the last [-1] the org/user
         # https://github.com/dabm-git/ --> [https:] [github.com] [dabm-git]
         username = re.findall("([^\/]+)", url)[-1]
 
@@ -68,17 +66,13 @@ class CrawlerGitHub:
             # target can be user or an org
             user = self.token.get_user(username)
             user_repos = user.get_repos()
-            # Note that repos forks are not listed in the user_repos! 
-            # 
-            if (user_repos.totalCount != 0):
-                pass # dont limit the search here
-            else:
+            # Note that repos forks are not listed in the user_repos!                  
+            if user_repos.totalCount == 0:
                 raise NoReposFound
-
             return self.get_repos(user_repos, username, from_url=True)
-            
+
         except BadCredentialsException:
-            PrintLog.log("\nGitHub Bad credentials")
+            PrintLog.log("\nGitHub Bad credentials")            
         except NoReposFound:
             PrintLog.log("\nNo data found for that user")
             
@@ -94,23 +88,21 @@ class CrawlerGitHub:
         keywords = '+'.join(keywords)
 
         # We look for the keywords at the readme, the project description and name
-        query =  keywords + '+in:name+in:readme+in:description' # filter by api?
+        query =  keywords + '+in:name+in:readme+in:description'
 
         # Filter by +stars
-        try:   
-            # Slice top 500 repos         
+        try:                   
             repos = self.token.search_repositories(query, 'stars', 'desc')
             # check if paginated list is empty
             if (repos.totalCount != 0):
-                repos_s = repos[:500] # In case of query is topic dont 
+                repos_s = repos[:500] # Only explore the top 500 repos
             else:
                 raise NoReposFound
            
             return self.get_repos(repos_s, keywords, from_keywords=True)       
          
-        except BadCredentialsException: # GitHub Exc
-            PrintLog.log("\nGitHub Bad credentials")            
-            
+        except BadCredentialsException:
+            PrintLog.log("\nGitHub Bad credentials")      
         except NoReposFound:
             PrintLog.log("\nNo data found for that query")            
             
@@ -122,20 +114,10 @@ class CrawlerGitHub:
         The result is exported to .csv files and then loaded into a Postgre database. 
         """ 
         # Note results are paginated
-        df_github = pd.DataFrame()   
-        
-        df_github['full_name'] = ""
-        df_github['link'] = ""
-        df_github['description'] = ""
-        df_github['stars'] = ""
-        df_github['forks'] = ""
-        df_github['watchers'] = ""
-        df_github['updated_on'] = ""   
-        df_github['keywords'] = ""
-        df_github['source'] = ""
-        df_github['uuid'] = ""
+        data = []
 
         PrintLog.log("Get GitHub repos started: " + keywords)
+
         # while True raise StopIteration
         while True:      
             try:
@@ -169,8 +151,8 @@ class CrawlerGitHub:
                     name = re.findall("([^/]*)$", str(clone_url))
                     full_name = name[0].replace('.git', '')
                     
-                    # Build the dataframe TODO: change to dict so bitbucket and github are the same  df_temp = {  }
-                    df_temp = pd.DataFrame({                        
+                    # Build the dataframe
+                    datarepo = {
                         'full_name': full_name,
                         'description': description,
                         'link': clone_url,
@@ -181,9 +163,8 @@ class CrawlerGitHub:
                         'keywords': merged_kw,
                         'source': "GitHub",
                         'uuid': str(uuid.uuid4())
-                        }, index=[0])
-
-                    df_github = df_github.append(df_temp)
+                    }
+                    data.append(datarepo)
                     
                     # Random delay to avoid requests timeout
                     time.sleep(random.uniform(0.1, 0.3))
@@ -193,18 +174,12 @@ class CrawlerGitHub:
             
             except BadCredentialsException:
                 PrintLog.log("\nGitHub Bad credentials")
-                break
-            except StopIteration:
-                # Backup, one file per keyword
+                break        
+            except StopIteration:                
+                df_github = pd.json_normalize(data=data)
+                del data
                 df_github.reset_index(drop=True, inplace=True)
-                file_name = "GitHub_"
-                if from_url:
-                    file_name = "GitHub_url_"
-                if from_keywords:
-                    file_name = "GitHub_kw_"
-                if from_topic:
-                    file_name = "GitHub_topic_"
-                
+
                 # if df_github is empty, no data found
                 if df_github.empty:
                     PrintLog.log("No VALID repos found for the given keywords in GitHub.")
@@ -215,31 +190,40 @@ class CrawlerGitHub:
                         df_github_cleaned = self.preprocess.clean_dataframe(df_github)
                     else:
                         df_github_cleaned = df_github
-                       
+
+                    del df_github
+
+                    file_name = "GitHub_"
+                    if from_url:
+                        file_name = "GitHub_url_"
+                    if from_keywords:
+                        file_name = "GitHub_kw_"
+                    if from_topic:
+                        file_name = "GitHub_topic_"
+            
                     # Export
                     SCRUtils.export_csv(df_github_cleaned, "./output/", file_name + keywords, True, True) 
                     # Upload           
-                    PrintLog.log("Upload pandas called from Github crawler: " + file_name + keywords)                  
+                    PrintLog.log("Upload pandas called from GitHub crawler: " + file_name + keywords)                  
                     self.elastic_end.upload_pandas(df_github_cleaned)
                         
-                    break
+                    return df_github_cleaned
 
             except requests.exceptions.Timeout:
                 PrintLog.log("\nRequests Timeout")
                 # Waint and relaunch the repo search ?
-                time.sleep(15)
-                pass
+                time.sleep(15)                
 
             except RateLimitExceededException:
                 # Tiempo de espera segUn la doc es de 1h
                 PrintLog.log("\nRateLimitExceededException")
                 PrintLog.log("Sleeping (1h)") 
                 # TODO: grab the wait time from API + change token?
-                time.sleep(3600) # Default docs 1h
-                pass
+                time.sleep(3600) # Default docs> 1h                
 
         # while loop end
-        return df_github
+        # return empty dataframe, some exception was raised
+        return pd.DataFrame()
 
 
 

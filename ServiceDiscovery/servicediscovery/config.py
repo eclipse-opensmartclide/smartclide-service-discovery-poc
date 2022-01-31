@@ -1,6 +1,8 @@
 #!/usr/bin/python3
 # Eclipse Public License 2.0
 
+from utils import ConfigReader
+
 class FlaskConfig():
 	# API config
 	PORT = 2020
@@ -14,14 +16,16 @@ class FlaskConfig():
 
 # scr tokens
 class ServiceDiscoeryConfig():
+	
     # The tokens are examples and are not valid
 	# GitHub API
-	GITHUB_ACCESS_TOKEN_1 = 'redacted'
+	GITHUB_ACCESS_TOKEN_1 = ConfigReader.read_config(section='tokens')['github_token']
 	# GitLab API
-	GITLAB_ACCESS_TOKEN_1 = 'redacted'
+	GITLAB_ACCESS_TOKEN_1 = ConfigReader.read_config(section='tokens')['gitlab_token']
 	# BitBucket API
-	BITBUCKET_ACCESS_TOKEN_1 = 'redacted'
+	BITBUCKET_ACCESS_TOKEN_1 = ConfigReader.read_config(section='tokens')['bitbucket_token']
  
-	# More tokens....
-	GITHUB_ACCESS_TOKEN_2 = 'redacted'
+	# TODO: Handle more tokens....
+	#GITHUB_ACCESS_TOKEN_2 = ConfigReader.read_config(section='tokens')['github_token_2']
+
 

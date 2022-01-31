@@ -94,8 +94,7 @@ class CrawlerBitbucket:
         # Iterate pages, start at 1
         for page in range(1, max_pages + 1):
 
-            url = f"https://bitbucket.org/repo/all/{str(page)}?name={keyword_split}"
-             # TODO: add the bitbucket token in header
+            url = f"https://bitbucket.org/repo/all/{str(page)}?name={keyword_split}"            
             response = SCRUtils.get_url(url, header="")
 
             # Find repos
@@ -140,13 +139,14 @@ class CrawlerBitbucket:
         # Max pages end
         # Create dataframe from json list & export one csv per keyword
         df_bitbucket_web = pd.json_normalize(data=data)
+        del data
         df_bitbucket_web.reset_index(drop=True, inplace=True)
 
         file_name = "Bitbucket_kw_"
 
-       
         # Clean
         df_bitbucket_web_cleaned = self.preprocess.clean_dataframe(df_bitbucket_web)
+        del df_bitbucket_web
         
         if df_bitbucket_web_cleaned.empty:
             PrintLog.log("No VALID repos found for the given keywords in BitBucket.")  
@@ -159,4 +159,4 @@ class CrawlerBitbucket:
         PrintLog.log("Upload to elastic called from BitBucket crawler: " + file_name + keyword_split)                  
         self.elastic_end.upload_pandas(df_bitbucket_web_cleaned)
 
-        return df_bitbucket_web
+        return df_bitbucket_web_cleaned
