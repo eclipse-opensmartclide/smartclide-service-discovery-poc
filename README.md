@@ -13,11 +13,14 @@ The service makes use of the 2020 port, be sure to expose it.
     python3 -m pip install --no-cache-dir -r requirements.txt
     python3 -m pip install . --upgrade
 ```
+Or build the image with the provided dockerfile.
+
 ## Run
 ```
 python3 servicediscovery
 ```
-Or using the built docker image, with docker-compose.
+
+Or using the built docker image hosted by ghcr.io, with docker-compose.
 
 ```
 version: '3'
@@ -25,7 +28,7 @@ version: '3'
 services:
   service_discovery:
     restart: unless-stopped
-    image: ghcr.io/eclipse-researchlabs/smartclide/service-discovery:2022-01-31
+    image: ghcr.io/eclipse-researchlabs/smartclide/service-discovery:2022-02-2
     working_dir: /app/smartclide-service-discovery-poc/ServiceDiscovery
     command: python3 servicediscovery
     ports:
@@ -35,7 +38,7 @@ services:
 Be sure to replace the necessary configuration in the [config.ini](https://github.com/eclipse-researchlabs/smartclide-service-discovery-poc/blob/main/ServiceDiscovery/config.ini) file, to do this you can overwrite it:
 ```
 volumes:
- -./config.ini:app/smartclide-service-discovery-poc/ServiceDiscovery/config.ini
+ -./config.ini:/app/smartclide-service-discovery-poc/ServiceDiscovery/config.ini
 ```
 
 
