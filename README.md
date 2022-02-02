@@ -17,7 +17,7 @@ The service makes use of the 2020 port, be sure to expose it.
 ```
 python3 servicediscovery
 ```
-Or using the built docker image, with docker-compose:
+Or using the built docker image, with docker-compose.
 
 ```
 version: '3'
@@ -31,6 +31,13 @@ services:
     ports:
       - "2020:2020"
 ```
+
+Be sure to replace the necessary configuration in the [config.ini](https://github.com/eclipse-researchlabs/smartclide-service-discovery-poc/blob/main/ServiceDiscovery/config.ini) file, to do this you can overwrite it:
+```
+volumes:
+ -./config.ini:app/smartclide-service-discovery-poc/ServiceDiscovery/config.ini
+```
+
 
 
 # Web service listings - SmartCLIDE
