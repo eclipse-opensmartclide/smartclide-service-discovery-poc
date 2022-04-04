@@ -86,8 +86,7 @@ class ServiceCrawledDataPreProcess:
 
     #preprocess and delete html tags
     def removeHTMLTags( self,string):
-        result = re.sub('<.*?>', '', string)
-        return result
+        return re.sub('<.*?>', '', string)
 
  
     def  filter_HTML_data(self,Clm_name,df=None):
