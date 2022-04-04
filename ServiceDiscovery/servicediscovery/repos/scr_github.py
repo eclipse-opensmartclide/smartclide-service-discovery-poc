@@ -50,9 +50,9 @@ class CrawlerGitHub:
             return self.get_repos(repos, p_topic, from_topic=True)
 
         except BadCredentialsException:
-            PrintLog.log("\nGitHub Bad credentials")
+            PrintLog.log("\n[GitHub] Bad credentials")
         except NoReposFound:
-            PrintLog.log("\nNo data found for that topic")
+            PrintLog.log("\n[GitHub] No data found for that topic")
 
     def get_from_url(self, url):
         """
@@ -72,9 +72,9 @@ class CrawlerGitHub:
             return self.get_repos(user_repos, username, from_url=True)
 
         except BadCredentialsException:
-            PrintLog.log("\nGitHub Bad credentials")            
+            PrintLog.log("\n[GitHub] GitHub Bad credentials")            
         except NoReposFound:
-            PrintLog.log("\nNo data found for that user")
+            PrintLog.log("\n[GitHub] No data found for that user")
             
     def get_from_keywords(self, keywords):
         """
@@ -88,7 +88,7 @@ class CrawlerGitHub:
         keywords = '+'.join(keywords)
 
         # We look for the keywords at the readme, the project description and name
-        query =  keywords + '+in:name+in:readme+in:description'
+        query = f'{keywords}+in:name+in:readme+in:description'
 
         # Filter by +stars
         try:                   
@@ -98,13 +98,13 @@ class CrawlerGitHub:
                 repos_s = repos[:500] # Only explore the top 500 repos
             else:
                 raise NoReposFound
-           
+
             return self.get_repos(repos_s, keywords, from_keywords=True)       
-         
+
         except BadCredentialsException:
-            PrintLog.log("\nGitHub Bad credentials")      
+            PrintLog.log("\n[GitHub] Bad credentials")      
         except NoReposFound:
-            PrintLog.log("\nNo data found for that query")            
+            PrintLog.log("\n[GitHub] No data found for that query")            
             
 
     def get_repos(self, payload, keywords, from_url = False, from_keywords = False, from_topic = False):
@@ -116,7 +116,7 @@ class CrawlerGitHub:
         # Note results are paginated
         data = []
 
-        PrintLog.log("Get GitHub repos started: " + keywords)
+        PrintLog.log("[GitHub] Get GitHub repos started: " + keywords)
 
         # while True raise StopIteration
         while True:      
@@ -173,7 +173,7 @@ class CrawlerGitHub:
                 raise StopIteration
             
             except BadCredentialsException:
-                PrintLog.log("\nGitHub Bad credentials")
+                PrintLog.log("[GitHub] Bad credentials")
                 break        
             except StopIteration:                
                 df_github = pd.json_normalize(data=data)
@@ -182,7 +182,7 @@ class CrawlerGitHub:
 
                 # if df_github is empty, no data found
                 if df_github.empty:
-                    PrintLog.log("No VALID repos found for the given keywords in GitHub.")
+                    PrintLog.log("[GitHub] No valid repos found for the given keywords.")
                     break
                 else:
                     # Clean
@@ -204,20 +204,20 @@ class CrawlerGitHub:
                     # Export
                     SCRUtils.export_csv(df_github_cleaned, "./output/", file_name + keywords, True, True) 
                     # Upload           
-                    PrintLog.log("Upload pandas called from GitHub crawler: " + file_name + keywords)                  
+                    PrintLog.log("[GitHub] Upload pandas called from GitHub crawler: " + file_name + keywords)                  
                     self.elastic_end.upload_pandas(df_github_cleaned)
                         
                     return df_github_cleaned
 
             except requests.exceptions.Timeout:
-                PrintLog.log("\nRequests Timeout")
+                PrintLog.log("[GitHub] Requests Timeout")
                 # Waint and relaunch the repo search ?
                 time.sleep(15)                
 
             except RateLimitExceededException:
                 # Tiempo de espera segUn la doc es de 1h
-                PrintLog.log("\nRateLimitExceededException")
-                PrintLog.log("Sleeping (1h)") 
+                PrintLog.log("[GitHub] RateLimitExceededException")
+                PrintLog.log("[GitHub] Sleeping (1h)") 
                 # TODO: grab the wait time from API + change token?
                 time.sleep(3600) # Default docs> 1h                
 

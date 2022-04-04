@@ -58,7 +58,7 @@ class CrawlerGitLab:
         url = ""
         w_flag = True
 
-        PrintLog.log("Get GitLab repos started: " + payload)
+        PrintLog.log("[GitLab] Get repos started: " + payload)
 
         # Iterate pages
         while (w_flag):        
@@ -139,7 +139,7 @@ class CrawlerGitLab:
         del df_gitlab
 
         if df_gitlab_cleaned.empty:
-            PrintLog.log("No VALID repos found for the given keywords in GitLab.")  
+            PrintLog.log("[GitLab] No valid repos found for the given keywords.")  
             return df_gitlab_cleaned # empty dataframe
 
         file_name = "GitLab_"
@@ -151,7 +151,7 @@ class CrawlerGitLab:
         # Export
         SCRUtils.export_csv(df_gitlab_cleaned, "./output/", file_name + payload, True, True) 
         # Upload
-        PrintLog.log("Upload pandas called from GitLab crawler: " + file_name + merged_kw)                  
+        PrintLog.log("[GitLab] Upload pandas called from GitLab crawler: " + file_name + merged_kw)                  
         self.elastic_end.upload_pandas(df_gitlab_cleaned)
         
         return df_gitlab_cleaned

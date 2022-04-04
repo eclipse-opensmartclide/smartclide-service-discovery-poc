@@ -24,21 +24,22 @@ class CrawlerBitbucket:
         """
         self.token = ptoken
 
-    # WIP
+    # WIP    
     def get_from_url_API(self, url):
+        None
         # Example multiple pages: https://bitbucket.org/atlassian_tutorial/ 
         # https://api.bitbucket.org/2.0/repositories/atlassian_tutorial/
         #   find next: https://api.bitbucket.org/2.0/repositories/atlassian_tutorial?page=2
-        user_org = "atlassian_tutorial"  
-        header = {'Authorization': "Bearer " + self.token}
-        next_page_url = 'https://api.bitbucket.org/2.0/repositories/%s?pagelen=10&fields=next,values.links.clone.href,values.slug' % user_org
+        #user_org = "atlassian_tutorial"  
+        #header = {'Authorization': "Bearer " + self.token}
+        #next_page_url = 'https://api.bitbucket.org/2.0/repositories/%s?pagelen=10&fields=next,values.links.clone.href,values.slug' % user_org
         
         # Parse repositories from the JSON
-        while next_page_url is not None:
-            response = SCRUtils.get_url(next_page_url, header=header)
-            page_json = response.json()            
-            print(page_json)        
-            # TODO: handle more API tokens in case of limit
+        #while next_page_url is not None:
+        #    response = SCRUtils.get_url(next_page_url, header=header)
+        #    page_json = response.json()            
+        #    print(page_json)        
+            # handle more API tokens in case of limit
             #for repo in page_json['values']:
             #    reponame=repo['slug']
             #    repohttp=repo['links']['clone'][0]['href'].replace('SaravThangaraj@','')
@@ -75,7 +76,7 @@ class CrawlerBitbucket:
         The result is exported to .csv files and then loaded into a Postgre database. 
         """ 
 
-        PrintLog.log("Get BitBucket repos started: " + keywords)
+        PrintLog.log("[BitBucket] Get repos started: " + keywords)
 
         # https://support.atlassian.com/bitbucket-cloud/docs/api-request-limits/
         # Git web (HTTPS://) requests           60,000 requests per hour
@@ -149,14 +150,14 @@ class CrawlerBitbucket:
         del df_bitbucket_web
         
         if df_bitbucket_web_cleaned.empty:
-            PrintLog.log("No VALID repos found for the given keywords in BitBucket.")  
+            PrintLog.log("[BitBucket] No valid repos found for the given keywords.")  
             return df_bitbucket_web_cleaned # empty dataframe
 
         # Export
         SCRUtils.export_csv(df_bitbucket_web_cleaned, "./output/", file_name + keyword_split, True, True)
 
         # Upload
-        PrintLog.log("Upload to elastic called from BitBucket crawler: " + file_name + keyword_split)                  
+        PrintLog.log("[BitBucket] Upload to elastic called from BitBucket crawler: " + file_name + keyword_split)                  
         self.elastic_end.upload_pandas(df_bitbucket_web_cleaned)
 
         return df_bitbucket_web_cleaned
