@@ -43,7 +43,7 @@ class GetGitHubRepos(Resource):
             from_topic = args['from_topic']
             # None
             if from_keyword is None and from_url is None and from_topic is None:
-                raise Exception("ValueError")
+                raise Exception("ValueError") 
             # Both
             if from_url and from_keyword and from_topic:
                 raise Exception("ValueError")
@@ -55,9 +55,8 @@ class GetGitHubRepos(Resource):
             if from_topic:
                 is_from_topic = True
 
-        except Exception as e:
-            #raise e
-            return FlaskUtils.handle400error(github_ns, 'The providen arguments are not correct. Please, check the swagger documentation at /v1')
+        except Exception as e:            
+            return FlaskUtils.handle400error(github_ns, 'The providen arguments are not correct.')
 
         # retrieve repos
         try:
@@ -77,12 +76,12 @@ class GetGitHubRepos(Resource):
                 result = r.to_json(orient="records")
                 r_json = json.loads(result)
 
-        except Exception as e:
-            return FlaskUtils.handle500error(github_ns)
+        except Exception as e: # Config can raise an exception
+            return FlaskUtils.handle503error(github_ns, 'GitHub discovery is unavailable.')
 
         # if there is not repos found  r_json == "", return 404 error
         if not r_json:
-            return FlaskUtils.handle404error(github_ns, 'No GitHub repos was found for the given parameters, or bad credentials')
+            return FlaskUtils.handle404error(github_ns, 'No GitHub repos was found for the given parameters.')
             
         # TODO: Shdl we return the raw repos found or the info about them? EX: found 39 new repos, inserted into the database ok.
         return r_json
