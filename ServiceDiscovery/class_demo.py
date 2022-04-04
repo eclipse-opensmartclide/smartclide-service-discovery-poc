@@ -3,25 +3,20 @@
 
 # Classification data demo - POST TO DLE API
 
+from traceback import print_tb
 import requests
 
 demo_json = """
 {
     "service_id":  34333,
     "service_name": " TransLoc openAPI",
-    "service_desc": 
-    "The TransLoc OpenAPI is a public RESTful API which allows developers to access real-time vehicle tracking information and incorporate this data into their website or mobile application."
+    "method":  "Default",
+    "service_desc": "The TransLoc OpenAPI is a public RESTful API which allows developers to access real-time vehicle tracking information and incorporate this data into their website or mobile application."
 }
 """
+url = 'http://smartclide.ddns.net:5001'
+uri = f'{url}/smartclide/v1/dle/serviceclassification'
 
-head_nocache = {
-    "Cache-Control": "no-cache",
-    "Pragma": "no-cache"
-}
-
-url = 'url'
-uri = url + '/servicediscovery/v1/service_search'
-
-res = requests.post(uri, json = demo_json, headers= head_nocache) # demo_json2
-if res.ok:
-    print(res.json())
+res = requests.post(uri, json = demo_json) # demo_json2
+print(res, end='\n\n')
+print(res.json())

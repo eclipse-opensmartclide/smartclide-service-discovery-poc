@@ -7,49 +7,23 @@ import uuid
 import requests
 import json
 
-demo_json ={
-    "full_name": {
-        "0": "insert-demo"
-    },
-    "description": {
-        "0": "Random service insert for the demo"
-    },
-    "link": {
-        "0": "https://url.com/1337/demo-leet"
-    },
-    "stars": {
-        "0": "0"
-    },
-    "forks": {
-        "0": "0"
-    },
-    "watchers": {
-        "0": "0"
-    },
-    "updated_on": {
-        "0": "0"
-    },
-    "keywords": {
-        "0": "demo"
-    },
-    "source": {
-        "0": "SmartCLIDE"
-    },
-    "uuid": {
-        "0": str(uuid.uuid4())
-    }
-}
+demo_dictionary = { "full_name": "insert-demo",
+                    "description":  "Random service insert for the demo",
+                    "link": "https://url.com/1337/demo-leet",
+                    "stars":  "0",  
+                    "forks": "0",
+                    "watchers": "0",
+                    "updated_on": "0",
+                    "keywords": "demo",
+                    "source": "SmartCLIDE_demo",   
+                    "uuid":  str(uuid.uuid4())
+                    }
 
-# convert demo_json to json
-json_data = json.dumps(demo_json)
+demo_json = json.dumps(demo_dictionary)
 
-head_nocache = {
-    "Cache-Control": "no-cache",
-    "Pragma": "no-cache"
-}
+url = 'http://localhost:2020'
+uri = f'{url}/servicediscovery/v1/service_insert'
 
-url = 'http://smartclide.ddns.net:2020'
-uri = url + '/servicediscovery/v1/service_insert'
-
-res = requests.post(uri, json = json_data, headers= head_nocache) # demo_json2
+res = requests.post(uri, json = demo_json)
+print(res, end='\n\n')
 print(res.json())

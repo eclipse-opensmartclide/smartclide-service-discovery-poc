@@ -6,19 +6,19 @@
 import requests
 import json
 
-demo_json ={
-    "full_name": {
-        "0": "django"
-    },
-    "description": {
-        "0": "API support for Django REST framework"
+demo_dictionary = {
+    "full_name": "django",    
+    "description":  "API support for Django REST framework",   
+    # if the keyword is not present, the DLE classifier generate a keyword based on the description
+    "keywords":  ""
     }
-}
 
-json_data = json.dumps(demo_json)
+demo_json = json.dumps(demo_dictionary)
 
-url = 'http://smartclide.ddns.net:2020'
-uri = url + '/servicediscovery/v1/service_search'
+url = 'http://localhost:2020'
+uri = f'{url}/servicediscovery/v1/service_search'
 
-res = requests.post(uri, json = json_data) # demo_json2
+res = requests.post(uri, json = demo_json)
+print(res, end='\n\n')
 print(res.json())
+
