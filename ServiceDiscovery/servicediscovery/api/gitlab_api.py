@@ -72,7 +72,7 @@ class GetGitLabRepos(Resource):
                 r_json = json.loads(result)
 
         except Exception as e:
-            return FlaskUtils.handle500error(gitlab_ns)
+            return FlaskUtils.handle503error(gitlab_ns, 'GitLab service discovery is unavailable.')
 
         # if there is not repos found  r_json == "", return 404 error
         if not r_json:
