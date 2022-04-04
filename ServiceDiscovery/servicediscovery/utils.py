@@ -17,8 +17,10 @@ class ConfigReader():
         Function for parsing the configuration file of the elasticsearch
         """  
         parser = ConfigParser()
-        parser.read(filename)     
+        parser.read(filename)   
+
         if not parser.has_section(section):
+            # Raise an exception to stop the execution
             raise Exception('Section {0} not found in the {1} file'.format(section, filename))
 
         params = parser.items(section)
@@ -74,9 +76,17 @@ class FlaskUtils():
         """
         return ns.abort(404, status=message, statusCode="404")
 
-    def handle500error(ns):
+    def handle503error(ns, message):
+        """
+        Function to handle a 503 (Service Unavailable ) error.
+        """
+        return ns.abort(503, status=message, statusCode="503")
+
+    def handle500error(ns, message=None):
         """
         Function to handle a 500 (unknown) error.
         """
-        message = "Unknown error, please contact administrator."
+        if message is None:
+            message = "Unknown error, please contact administrator."
+
         return ns.abort(500, status=message, statusCode="500")
