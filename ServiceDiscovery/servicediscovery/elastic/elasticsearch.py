@@ -2,6 +2,7 @@
 # Eclipse Public License 2.0
 
 import pandas as pd
+import requests
 from elasticsearch import Elasticsearch
 from elasticsearch import helpers
 import json
@@ -12,28 +13,28 @@ class Elastic():
 
     elastic = None
     index = 'scr_index'
-
+    dle = 'localhost'
+    
     def __init__(self):
         self.elastic = self.__configure_elastic()        
         
-    def __configure_elastic(self):
-        # connect to elasticserach        
+    def __configure_elastic(self):       
+        dle_config = ConfigReader.read_config(section='dle')
+        self.dle = dle_config['scheme'] + '://' + dle_config['host'] + ':' + dle_config['port'] + dle_config['endpoint']
+
         config = ConfigReader.read_config(section='elastic')
-
-        PrintLog.log('[elastic] Connecting to Elasticsearch.')
-
         self.index = config['index']
+
         return Elasticsearch(
-             [config['host']+ ':' + config['port']],
-             http_auth=(config['user'], config['password']),
-             scheme=config['scheme'], # SSL?
+             [config['scheme'] + '://' +  config['host']+ ':' + config['port']],
+             http_auth=(config['user'], config['password']),                     
              verify_certs=False,
              http_compress=True
          )
         
     # Get rid of blank values
     def __safe_value(self, colum):
-        return colum if not pd.isna(colum) else "Other"
+        return "Other" if pd.isna(colum) else colum
     
     # Generate documents for bulk upload
     def __doc_generator(self, df):
@@ -47,53 +48,89 @@ class Elastic():
                     "_source": document.to_dict(), # use a filter?
                 }    
         
-    def upload_pandas(self, pd_to_up):                
+    def upload_pandas(self, pd_to_up):   
+        # TODO: If the connection is bad, retunr an error           
         # Upload to elastic the cleaned pandas using helpers bulk and doc_generator
-        PrintLog.log('[elastic] Uploading pandas using bulk and doc_generator.')  
+        PrintLog.log('[Elastic] Uploading pandas using bulk and doc_generator called.')  
                  
-        helpers.bulk(self.elastic, self.__doc_generator(pd_to_up))        
+        return helpers.bulk(self.elastic, self.__doc_generator(pd_to_up))        
 
     def search(self, json_data):                
         # Upload to elastic the cleaned pandas using helpers bulk and doc_generator
-        PrintLog.log('[elastic] Searching in Elasticsearch.')
+        PrintLog.log('[Elastic] Building the query.')
 
         # Normalize json        
         json_query = json.loads(json_data)
-        
-        # To daraframe, this step is not necessary since we can acces the json directly..
+
+        # To daraframe, this step is not necessary since we can acces the json directly...
         query_dataframe = pd.DataFrame.from_dict(json_query)
 
-        # TODO: Check if we have the colums we need, full_name and description
-        # TODO: Use DLE to classify the query to get the right keywords based on the description
+        # Check if we have the colums we need, full_name and description
+        if (
+            'full_name' not in query_dataframe.columns
+            or 'description' not in query_dataframe.columns
+            or 'keywords' not in query_dataframe.columns
+        ):                 
+            return {"status" :"Columns full_name, description and keywords are required.", "statusCode" : 400}
 
-        # Build query
-        query = query_dataframe["full_name"][0] + " OR " +  query_dataframe["description"][0] # + " OR " + query_dataframe["keywords"][0]
-        
+        # check if full_name and description are not empty
+        if (
+            query_dataframe['full_name'][0] == ''
+            or query_dataframe['description'][0] == ''         
+        ):
+            return {"status": "full_name and description data is required." , "statusCode" : 400}
+
+        # if keywords is empty, call the dle endpoint
+        if query_dataframe['keywords'][0] == '':
+            # TODO: debug this 
+            class_params = {	
+                "service_id": "1337",
+                "method": "Default",
+                "service_name": query_dataframe['full_name'][0],
+                "service_desc": query_dataframe['description'][0]               
+            }          
+            response = requests.post(self.dle, json=json.dumps(class_params))
+            if response.ok:
+                query_dataframe['keywords'] = response.json()['service_class']
+            
+            
+        # Build query with the first row
+        query = query_dataframe["full_name"][0] + " OR " +  query_dataframe["description"][0]  + " OR " + query_dataframe["keywords"][0]
+
         query_body ={
             "query": {
                 "query_string" : {
-                "fields" : ["description", "full_name"], #"keywords"],
+                "fields" : ["description", "full_name", "keywords"],
                 "query" : query,
                 }
             }
-        }        
+        }
+
+        PrintLog.log('[Elastic] Querying Elasticsearch.')
         # The actual search in the scr index
-        result = self.elastic.search(index="scr_index", body=query_body) # scr_index
+        try:
+            result = self.elastic.search(index=self.index, body=query_body)
+        except Exception as e:
+            PrintLog.log('[Elastic] Serach service is unavailable, check the Elasticsearch status')
+            return {"status" : "Serach service is unavailable", "statusCode" : 503}
 
         # Filter by hits
         all_hits = result['hits']['hits']
         # No hits?
         if all_hits == []:
-            return {"0" :"No services have been found for that query. The Crawler subcomponent will search for it. Try again later."}
+            if query_dataframe['keywords'][0] != '':                
+                # slef call the github api
+                kw = query_dataframe['keywords'][0]
+                get_params = {'from_keyword': kw}
+                # TODO: parametrize the url and handle request errors
+                _ = requests.get("http://localhost:2020/scr/v1/crawl_github", params=get_params)
 
-        # TODO: Self call the crawler to get the data if all_hits is empty
+            return {"status" :"No services have been found for that query. The Crawler subcomponent will search for it. Try again later.", "statusCode" : 200}
 
-        # We have hits!
-        # Iterate the nested dictionaries inside the ["hits"]["hits"] list
-        hits = [json.dumps(doc) for num, doc in enumerate(all_hits)]
-
-        # TODO, normalize socres of the hits            
+        #  We have hits! Iterate the nested dictionaries inside the ["hits"]["hits"] list
+        hits = [json.dumps(doc) for _, doc in all_hits]
         return json.dumps(hits) # return the json with the hits
+        
         
         
         
