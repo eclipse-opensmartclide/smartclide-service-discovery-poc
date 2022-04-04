@@ -1,6 +1,4 @@
 #!/bin/bash
-
-# Copyright 2021 AIR Institute
-# See LICENSE for details.
+# Eclipse Public License 2.0
 
 docker-compose down

@@ -1,3 +1,5 @@
+# Eclipse Public License 2.0
+
 FROM ubuntu:latest 
 
 MAINTAINER AIR Institute "dabm@air-institute.org"
