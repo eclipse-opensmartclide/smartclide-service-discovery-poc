@@ -53,15 +53,14 @@ class GetBitbucketRepos(Resource):
 
         except Exception as e:
             #raise e
-            return FlaskUtils.handle400error(bitbucket_ns, 'The providen arguments are not correct. Please, check the swagger documentation at /v1')
+            return FlaskUtils.handle400error(bitbucket_ns, 'The providen arguments are not correct.')
 
         # retrieve repos
         try:
-            bitbucket = CrawlerBitbucket(ServiceDiscoeryConfig.BITBUCKET_ACCESS_TOKEN_1)
-            # TODO: param forks
+            bitbucket = CrawlerBitbucket(ServiceDiscoeryConfig.BITBUCKET_ACCESS_TOKEN_1)            
             if is_from_url:                
                 #r = bitbucket.get_from_url(from_url, get_forks=False)
-                return FlaskUtils.handle500error2(bitbucket_ns)
+                return FlaskUtils.handle503error(bitbucket_ns, 'Not implemented yet.')
             if is_from_keyword:                
                 r = bitbucket.get_from_keywords_web(from_keyword)
                 
@@ -73,11 +72,11 @@ class GetBitbucketRepos(Resource):
                 r_json = json.loads(result)
 
         except Exception as e:
-            return FlaskUtils.handle500error(bitbucket_ns)
+            return FlaskUtils.handle503error(bitbucket_ns, 'Bitbucket discovery is unavailable')
 
         # if there is not repos found  r_json == "", return 404 error
         if not r_json:
             return FlaskUtils.handle404error(bitbucket_ns, 'No Bitbucket repos was found for the given parameters.')
         
-        # TODO: Shdl we return the raw repos found or the info about them? EX: found 39 new repos, inserted into the database ok.
+        # TODO: Shdl we return the raw repos found or the info about them? EX: found 39 new repositories
         return r_json
