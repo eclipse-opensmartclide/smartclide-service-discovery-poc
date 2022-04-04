@@ -1,8 +1,7 @@
 #!/usr/bin/python3
 # Eclipse Public License 2.0
-#
-# dabm@air-institute.org
-#
+
+# MAINTAINER: dabm@air-institute.org
 
 """ Programableweb
 
