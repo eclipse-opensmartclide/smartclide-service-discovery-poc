@@ -1,6 +1,8 @@
 #!/usr/bin/python3
 # Eclipse Public License 2.0
 
+import re
+from tkinter import E
 import pandas as pd
 import requests
 from elasticsearch import Elasticsearch
@@ -24,14 +26,14 @@ class Elastic():
 
         config = ConfigReader.read_config(section='elastic')
         self.index = config['index']
-
-        return Elasticsearch(
-             [config['scheme'] + '://' +  config['host']+ ':' + config['port']],
-             http_auth=(config['user'], config['password']),                     
-             verify_certs=False,
-             http_compress=True
-         )
         
+        try:
+            ES_ENDPOINT = config['scheme'] + '://' + config['user'] + ':' + config['password'] + '@' + config['host'] + ':' + config['port']                                  
+            return Elasticsearch([ES_ENDPOINT], api_key=(config['api_id'], config['api_key']))
+        except Exception as error:
+            PrintLog.log(f'[Elastic] Error: {str(error)}')
+            return None
+  
     # Get rid of blank values
     def __safe_value(self, colum):
         return "Other" if pd.isna(colum) else colum
@@ -58,13 +60,13 @@ class Elastic():
     def search(self, json_data):                
         # Upload to elastic the cleaned pandas using helpers bulk and doc_generator
         PrintLog.log('[Elastic] Building the query.')
-
-        # Normalize json        
+   
+        # Normalize json, str -> dict        
         json_query = json.loads(json_data)
 
-        # To daraframe, this step is not necessary since we can acces the json directly...
-        query_dataframe = pd.DataFrame.from_dict(json_query)
-
+        # To daraframe, this step is not necessary since we can acces the json directly...        
+        query_dataframe = pd.DataFrame(json_query, index=[0])
+    
         # Check if we have the colums we need, full_name and description
         if (
             'full_name' not in query_dataframe.columns
@@ -82,6 +84,7 @@ class Elastic():
 
         # if keywords is empty, call the dle endpoint
         if query_dataframe['keywords'][0] == '':
+            PrintLog.log('[Elastic] Query keyword is empty, calling DLE service classification.')
             # TODO: debug this 
             class_params = {	
                 "service_id": "1337",
@@ -91,11 +94,13 @@ class Elastic():
             }          
             response = requests.post(self.dle, json=json.dumps(class_params))
             if response.ok:
-                query_dataframe['keywords'] = response.json()['service_class']
-            
+                query_dataframe['keywords'] = response.json()['service_class']            
             
         # Build query with the first row
-        query = query_dataframe["full_name"][0] + " OR " +  query_dataframe["description"][0]  + " OR " + query_dataframe["keywords"][0]
+        query = query_dataframe["full_name"][0] + " OR " +  query_dataframe["description"][0]
+
+        if query_dataframe["keywords"][0] != "":
+            query = query + " OR " + query_dataframe["keywords"][0]
 
         query_body ={
             "query": {
@@ -106,12 +111,13 @@ class Elastic():
             }
         }
 
-        PrintLog.log('[Elastic] Querying Elasticsearch.')
+        PrintLog.log('[Elastic] Querying Elasticsearch: ' + str(query_body))       
         # The actual search in the scr index
         try:
             result = self.elastic.search(index=self.index, body=query_body)
         except Exception as e:
             PrintLog.log('[Elastic] Serach service is unavailable, check the Elasticsearch status')
+            PrintLog.log(e)
             return {"status" : "Serach service is unavailable", "statusCode" : 503}
 
         # Filter by hits
@@ -127,8 +133,9 @@ class Elastic():
 
             return {"status" :"No services have been found for that query. The Crawler subcomponent will search for it. Try again later.", "statusCode" : 200}
 
-        #  We have hits! Iterate the nested dictionaries inside the ["hits"]["hits"] list
-        hits = [json.dumps(doc) for _, doc in all_hits]
+        #  We have hits! Iterate the nested dictionaries inside the ["hits"]["hits"] list       
+        hits = [json.dumps(doc) for _, doc in enumerate(all_hits)]
+
         return json.dumps(hits) # return the json with the hits
         
         
