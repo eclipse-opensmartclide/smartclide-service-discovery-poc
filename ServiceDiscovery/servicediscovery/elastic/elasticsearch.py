@@ -1,8 +1,6 @@
 #!/usr/bin/python3
 # Eclipse Public License 2.0
 
-import re
-from tkinter import E
 import pandas as pd
 import requests
 from elasticsearch import Elasticsearch
