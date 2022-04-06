@@ -72,7 +72,7 @@ class GetBitbucketRepos(Resource):
                 r_json = json.loads(result)
 
         except Exception as e:
-            return FlaskUtils.handle503error(bitbucket_ns, 'Bitbucket discovery is unavailable')
+            return FlaskUtils.handle503error(bitbucket_ns, 'Bitbucket service discovery is unavailable')
 
         # if there is not repos found  r_json == "", return 404 error
         if not r_json:
