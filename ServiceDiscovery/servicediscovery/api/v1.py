@@ -33,13 +33,16 @@ class GetStatus(Resource):
         try:
             if not (content := request.get_json()):
                 FlaskUtils.handle400error(insert_ns, "Empty POST data")                
-        except:
+        except Exception:
             FlaskUtils.handle400error(insert_ns, "Invalid data format")            
 
         # try to convert the data to a dataframe
         try:
+            # if is dict, convert to string
+            if (type(content) == dict):
+                content = json.dumps(content)
             df = pd.json_normalize(json.loads(content))
-        except:
+        except Exception:
             FlaskUtils.handle400error(insert_ns, "Invalid data format")
 
 

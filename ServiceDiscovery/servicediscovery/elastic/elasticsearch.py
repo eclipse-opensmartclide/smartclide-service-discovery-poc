@@ -59,8 +59,11 @@ class Elastic():
         # Upload to elastic the cleaned pandas using helpers bulk and doc_generator
         PrintLog.log('[Elastic] Building the query.')
    
-        # Normalize json, str -> dict        
-        json_query = json.loads(json_data)
+        # if the data is a dict, convert it to string then to json
+        if (type(json_data) == dict):
+            json_query = json.loads(json.dumps(json_data))
+        else: # data is a string, convert it to json            
+            json_query = json.loads(json_data)
 
         # To daraframe, this step is not necessary since we can acces the json directly...        
         query_dataframe = pd.DataFrame(json_query, index=[0])
