@@ -8,7 +8,7 @@ from elasticsearch import helpers
 import json
 
 from utils import PrintLog, ConfigReader
-
+    
 class Elastic():
 
     elastic = None
@@ -58,7 +58,7 @@ class Elastic():
     def search(self, json_data):                
         # Upload to elastic the cleaned pandas using helpers bulk and doc_generator
         PrintLog.log('[Elastic] Building the query.')
-   
+
         # if the data is a dict, convert it to string then to json
         if (type(json_data) == dict):
             json_query = json.loads(json.dumps(json_data))
@@ -67,7 +67,7 @@ class Elastic():
 
         # To daraframe, this step is not necessary since we can acces the json directly...        
         query_dataframe = pd.DataFrame(json_query, index=[0])
-    
+
         # Check if we have the colums we need, full_name and description
         if (
             'full_name' not in query_dataframe.columns
@@ -96,7 +96,7 @@ class Elastic():
             response = requests.post(self.dle, json=json.dumps(class_params))
             if response.ok:
                 query_dataframe['keywords'] = response.json()['service_class']            
-            
+
         # Build query with the first row
         query = query_dataframe["full_name"][0] + " OR " +  query_dataframe["description"][0]
 
@@ -112,7 +112,7 @@ class Elastic():
             }
         }
 
-        PrintLog.log('[Elastic] Querying Elasticsearch: ' + str(query_body))       
+        PrintLog.log(f'[Elastic] Querying Elasticsearch: {query_body}')
         # The actual search in the scr index
         try:
             result = self.elastic.search(index=self.index, body=query_body)

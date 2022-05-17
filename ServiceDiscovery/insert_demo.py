@@ -19,11 +19,9 @@ demo_dictionary = { "full_name": "insert-demo",
                     "uuid":  str(uuid.uuid4())
                     }
 
-demo_json = json.dumps(demo_dictionary)
-
 url = 'http://localhost:2020'
 uri = f'{url}/servicediscovery/v1/service_insert'
 
-res = requests.post(uri, json = demo_json)
+res = requests.post(uri, json = demo_dictionary)
 print(res, end='\n\n')
 print(res.json())

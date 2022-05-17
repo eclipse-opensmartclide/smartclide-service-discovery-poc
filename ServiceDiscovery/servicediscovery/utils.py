@@ -64,6 +64,12 @@ class SCRUtils():
 # flask errors    
 class FlaskUtils():
 
+    def handle200error(ns, message):
+        """
+        Function to handle 200 response
+        """
+        return message.json()
+
     def handle400error(ns, message):
         """
         Function to handle a 400 (bad arguments code) error.

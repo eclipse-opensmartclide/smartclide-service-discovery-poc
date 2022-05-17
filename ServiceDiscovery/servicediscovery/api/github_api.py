@@ -6,13 +6,12 @@ import json
 from flask_restx import Resource
 
 # scr API
-from api.v1 import api
+from api.api import api
 from core import cache, limiter
 from utils import FlaskUtils
 from config import ServiceDiscoeryConfig
 
 # github
-from api.models.github_model import github_model
 from api.parsers.github_parser import github_argument_parser
 from repos.scr_github import CrawlerGitHub
 
@@ -26,7 +25,6 @@ class GetGitHubRepos(Resource):
     @api.response(404, 'Data not found')
     @api.response(500, 'Unhandled errors')
     @api.response(400, 'Invalid parameters')
-    #@api.marshal_with(github_model, code=200, description='OK', as_list=True)
     def get(self):
         """
         Returns a JSON array with the repo information

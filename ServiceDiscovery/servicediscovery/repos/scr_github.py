@@ -25,7 +25,6 @@ class NoReposFound(Exception):
 class CrawlerGitHub:
 
     preprocess = ServiceCrawledDataPreProcess()
-    elastic_end = Elastic()
 
     # constructor
     def __init__(self, ptoken):

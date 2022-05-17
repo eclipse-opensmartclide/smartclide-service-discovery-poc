@@ -14,7 +14,7 @@ def read_requeriments_file(filename):
             yield line.strip()
 
 setup(
-    name='Service Discovery API - SmartCLIDE',
+    name='SmartCLIDE - Service Discovery API',
     version='1.0',
     packages=find_packages(),
     url='',
@@ -22,7 +22,7 @@ setup(
     license='Eclipse Public License 2.0',
     author='AIR Institute',
     author_email='dabm@air-institute.org',
-    description='Flask RESTX API for Service Discovery - SmartCLIDE',
+    description='SmartCLIDE - Flask RESTX API for Service Discovery',
     long_description=readme(),
     long_description_content_type='text/markdown',
     install_requires=list(read_requeriments_file('requirements.txt')),

@@ -4,14 +4,12 @@
 import json
 
 from flask_restx import Resource
-
-from api.v1 import api
+from api.api import api
 from core import cache, limiter
 from utils import FlaskUtils
 from config import ServiceDiscoeryConfig
 
 # gitlab
-from api.models.gitlab_model import gitlab_model
 from api.parsers.gitlab_parser import gitlab_argument_parser
 from repos.scr_gitlab import CrawlerGitLab
 
@@ -25,13 +23,11 @@ class GetGitLabRepos(Resource):
     @api.response(404, 'Data not found')
     @api.response(500, 'Unhandled errors')
     @api.response(400, 'Invalid parameters')
-    #@api.marshal_with(gitlab_model, code=200, description='OK', as_list=True)
     def get(self):
         """
         Returns a JSON array with the repo information
         """
         # retrieve and chek arguments
-
         is_from_url = False
         is_from_keyword = False
         r_json = ""        
