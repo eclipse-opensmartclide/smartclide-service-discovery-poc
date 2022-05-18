@@ -26,7 +26,13 @@ class GetStatus(Resource):
     def post(self): 
         # get data from POST
         if not (data := request.get_json()):
-            FlaskUtils.handle400error(insert_ns, "Empty POST data")                
+            FlaskUtils.handle400error(insert_ns, "Empty POST data")   
+                     
+        try:
+            db = Database()
+        except Exception as err:
+            FlaskUtils.handle500error(insert_ns, "Search Service is unavailable")
+
 
         # check if df have all the right columns
         if not {
@@ -51,7 +57,7 @@ class GetStatus(Resource):
 
         # new database handler
         try:
-            res =  Database().insert_service(data)
+            res =  db.insert_service(data)
             PrintLog.log(f"[service_insert] Inserting new service to the SmartCLIDE registry:\n{data}")
             # export the json data to csv
             try:

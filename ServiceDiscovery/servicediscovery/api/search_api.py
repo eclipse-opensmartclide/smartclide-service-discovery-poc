@@ -24,15 +24,15 @@ class GetStatus(Resource):
     @api.response(400, 'Invalid parameters')
     @api.response(503, 'Service Unavailable')
     def post(self):
-
+        # get data from POST
         if (data := request.get_json()) is None:                
             FlaskUtils.handle400error(search_ns, "Empty POST data")
 
         # new database handler
-        # try:
-        #     db = Database()
-        # except Exception as err:
-        #     FlaskUtils.handle500error(search_ns, "Search Service is unavailable, check the database configuration")
+        try:
+            db = Database()
+        except Exception as err:
+            FlaskUtils.handle500error(search_ns, "Search Service is unavailable")
 
         # Data basic validation
         # Check if we have full_name, method and description, keywords is optional
@@ -70,6 +70,6 @@ class GetStatus(Resource):
         # The actual search
         try:
             PrintLog.log(f'[Search Service] Searching for service:\n{data}')
-            #return db.search_service(data)
+            return db.search_service(data)
         except Exception as _:
             FlaskUtils.handle500error(search_ns, "Search Service is unavailable")
