@@ -27,7 +27,7 @@ class Database():
 
         # if the database is not available, raise an error
         if self._get_status() is None:
-            raise Exception('[Database] Error: Database is not available')
+            raise Exception('[Database] Database is not available')
 
     
     # check status of the database?
@@ -41,10 +41,10 @@ class Database():
             res = requests.get(self.database_endpoint + endpoint, json = data)
             # handle error codes
             if res.status_code != 200:
-                raise Exception(f'[Database] Error: {res.status_code}')
+                raise Exception(f'[Database] Bad response: {res.status_code}')
             return res
         except Exception as error:
-            PrintLog.log(error)
+            PrintLog.log(f'[Database] Error in get(): {str(error)}')
             return None
     
     # Post handler
@@ -55,8 +55,8 @@ class Database():
             if res.status_code != 200:
                 PrintLog.log(f'[Database] Error: {res.status_code}')                
             return res
-        except Exception as err:
-            PrintLog.log(err)
+        except Exception as error:
+            PrintLog.log(f'[Database] Error in post(): {str(error)}')
             return None
 
     # Insert a service

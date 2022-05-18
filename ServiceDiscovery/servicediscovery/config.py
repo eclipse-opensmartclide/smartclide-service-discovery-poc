@@ -22,8 +22,8 @@ class ServiceDiscoeryConfig():
 	GITHUB_ACCESS_TOKEN_1 = ConfigReader.read_config(section='tokens')['github_token']
 	# GitLab API
 	GITLAB_ACCESS_TOKEN_1 = ConfigReader.read_config(section='tokens')['gitlab_token']
-	# BitBucket API
-	BITBUCKET_ACCESS_TOKEN_1 = ConfigReader.read_config(section='tokens')['bitbucket_token']
+	# BitBucket API - not used, web crawler is used
+	#BITBUCKET_ACCESS_TOKEN_1 = ConfigReader.read_config(section='tokens')['bitbucket_token']
  
 	# TODO: Handle more tokens....
 	#GITHUB_ACCESS_TOKEN_2 = ConfigReader.read_config(section='tokens')['github_token_2']

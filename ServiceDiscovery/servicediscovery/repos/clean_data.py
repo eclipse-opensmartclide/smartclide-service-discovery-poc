@@ -12,22 +12,30 @@ class ServiceCrawledDataPreProcess:
 
     df_crawled = pd.DataFrame()
 
-    def clean_dataframe(self, df):
+    def clean_data(self, df):
+
+        # if the type of df is not dataframe, convert it to dataframe
+        if not isinstance(df, pd.DataFrame):
+            df = pd.DataFrame(df)
+        
         if df is not None:
             self.df_crawled = df
-
-        # filter to have just english data in description
-        self.df_crawled = self.filter_en_data("description")
-        # filter Nan, null values
-        self.df_crawled = self.remove_null("description")
+        
+        # check if the description is more than 10 characters, else skip it        
+        if(df['description'].str.len().max()>10):
+            # filter to have just english data in description
+            self.df_crawled = self.filter_en_data("description")
+            # filter Nan, null values
+            self.df_crawled = self.remove_null("description")        
+            # filter html
+            self.df_crawled = self.filter_HTML_data("description")
+            # filter url
+            self.df_crawled = self.filter_URL_data("description")
+            # filter based on len
+            self.df_crawled = self.filter_based_len("description")
+        
         self.df_crawled = self.remove_null("keywords")
-        # filter html
-        self.df_crawled = self.filter_HTML_data("description")
-        # filter url
-        self.df_crawled = self.filter_URL_data("description")
-        # filter based on len
-        self.df_crawled = self.filter_based_len("description")
-        # reduce the length of df_crawled["description"] to 50       
+     
         return self.df_crawled
         
     def load_crawled_data(self):

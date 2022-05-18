@@ -2,10 +2,10 @@
 # Eclipse Public License 2.0
 
 import time
-import pandas as pd
 import random
 import requests # requests.exceptions.Timeout
 import re
+import pandas as pd
 import uuid
 
 # pygithub
@@ -16,8 +16,8 @@ from github import GithubException
 
 # own
 from utils import SCRUtils, PrintLog
-from servicediscovery.elastic.elasticsearch import Elastic
-from servicediscovery.repos.clean_data import ServiceCrawledDataPreProcess
+from database.database_handler import Database
+from repos.clean_data import ServiceCrawledDataPreProcess
 
 class NoReposFound(Exception):
     pass
@@ -39,7 +39,7 @@ class CrawlerGitHub:
         """        
         # Filter by topics? ex: api, service, rest, swagger
         # We look for the topics
-        query = 'topic:' + p_topic
+        query = f'topic:{p_topic}'
 
         # get github repos using a topic
         try:
@@ -73,7 +73,7 @@ class CrawlerGitHub:
         except BadCredentialsException:
             PrintLog.log("\n[GitHub] GitHub Bad credentials")            
         except NoReposFound:
-            PrintLog.log("\n[GitHub] No data found for that user")
+            PrintLog.log(f"\n[GitHub] No data found for the user: {user}")
             
     def get_from_keywords(self, keywords):
         """
@@ -103,7 +103,7 @@ class CrawlerGitHub:
         except BadCredentialsException:
             PrintLog.log("\n[GitHub] Bad credentials")      
         except NoReposFound:
-            PrintLog.log("\n[GitHub] No data found for that query")            
+            PrintLog.log(f"\n[GitHub] No data found for the keywords: {keywords}")            
             
 
     def get_repos(self, payload, keywords, from_url = False, from_keywords = False, from_topic = False):
@@ -115,10 +115,10 @@ class CrawlerGitHub:
         # Note results are paginated
         data = []
 
-        PrintLog.log("[GitHub] Get GitHub repos started: " + keywords)
+        PrintLog.log(f"[GitHub] Get GitHub repos started: {keywords}")
 
         # while True raise StopIteration
-        while True:      
+        while True:  
             try:
                 for repo in payload:
 
@@ -128,7 +128,7 @@ class CrawlerGitHub:
                     stars = str(repo.stargazers_count)
                     forks = str(repo.forks_count)
                     watchers = str(repo.watchers_count)
-                    
+
                     # + spacer due , is used in the .csv
                     topics = '+'.join(repo.get_topics())
 
@@ -141,15 +141,15 @@ class CrawlerGitHub:
                         continue # next repo, this one is empty
 
                     # If we have more topics, merge them with the kw
-                    merged_kw = keywords                    
+                    merged_kw = keywords
                     if topics:
-                        merged_kw = keywords + "+" + topics
+                        merged_kw = f"{keywords}+{topics}"
 
                     # Get the repo name from url
                     # Find the word after url / and remove .git
-                    name = re.findall("([^/]*)$", str(clone_url))
+                    name = re.findall("([^/]*)$", clone_url)
                     full_name = name[0].replace('.git', '')
-                    
+
                     # Build the dataframe
                     datarepo = {
                         'full_name': full_name,
@@ -164,33 +164,24 @@ class CrawlerGitHub:
                         'uuid': str(uuid.uuid4())
                     }
                     data.append(datarepo)
-                    
+
                     # Random delay to avoid requests timeout
                     time.sleep(random.uniform(0.1, 0.3))
 
                 # loop result end
                 raise StopIteration
-            
+
             except BadCredentialsException:
                 PrintLog.log("[GitHub] Bad credentials")
-                break        
-            except StopIteration:                
-                df_github = pd.json_normalize(data=data)
-                del data
-                df_github.reset_index(drop=True, inplace=True)
-
-                # if df_github is empty, no data found
-                if df_github.empty:
-                    PrintLog.log("[GitHub] No valid repos found for the given keywords.")
-                    break
+                break
+            except StopIteration:
+                # data (list of json) to pandas
+                if not data:
+                    PrintLog.log("[GitLab] No valid repos found for the given input.")  
+                    return {} # empty
                 else:
                     # Clean
-                    if not from_url:               
-                        df_github_cleaned = self.preprocess.clean_dataframe(df_github)
-                    else:
-                        df_github_cleaned = df_github
-
-                    del df_github
+                    df_github_cleaned = pd.DataFrame(data) if from_url else self.preprocess.clean_data(data)
 
                     file_name = "GitHub_"
                     if from_url:
@@ -199,14 +190,22 @@ class CrawlerGitHub:
                         file_name = "GitHub_kw_"
                     if from_topic:
                         file_name = "GitHub_topic_"
-            
+
                     # Export
-                    SCRUtils.export_csv(df_github_cleaned, "./output/", file_name + keywords, True, True) 
-                    # Upload           
-                    PrintLog.log("[GitHub] Upload pandas called from GitHub crawler: " + file_name + keywords)                  
-                    self.elastic_end.upload_pandas(df_github_cleaned)
-                        
-                    return df_github_cleaned
+                    SCRUtils.export_csv(df_github_cleaned, "./output/", file_name + keywords, True, True)
+
+                    PrintLog.log(f"[GitHub] Upload to database called from GitHub crawler:\n{df_github_cleaned}")
+
+                    # upload to Database                    
+                    json_data = df_github_cleaned.to_json(orient='records')
+
+                    # at this point we have some data, so we can upload it to the database
+                    try:
+                        _ = Database().insert_service(json_data)
+                    except Exception as e:
+                        PrintLog.log(f"[GitHub] Error while inserting data into database: {e}")
+
+                    return json_data
 
             except requests.exceptions.Timeout:
                 PrintLog.log("[GitHub] Requests Timeout")
@@ -221,8 +220,8 @@ class CrawlerGitHub:
                 time.sleep(3600) # Default docs> 1h                
 
         # while loop end
-        # return empty dataframe, some exception was raised
-        return pd.DataFrame()
+        # return empty 
+        return {}
 
 
 

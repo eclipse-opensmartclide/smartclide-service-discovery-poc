@@ -8,6 +8,6 @@ bitbucket_argument_parser = reqparse.RequestParser()
 bitbucket_argument_parser.add_argument('from_keyword',
                                        location='args',
                                        type=str,
-                                       required=False,
+                                       required=True,
                                        default=None,
                                        help='The keyword to retrieve repo information from.')

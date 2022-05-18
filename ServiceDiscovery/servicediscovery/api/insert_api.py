@@ -9,13 +9,14 @@ from api.api import api
 from core import cache, limiter
 from database.database_handler import Database
 from utils import PrintLog, FlaskUtils
-from api.service_discovery_models import service_insert_model
+from api.service_discovery_models import service_insert_model, service_insert_model_example
 
 insert_ns = api.namespace('service_insert', description='Insert a new service to the SmartCLIDE registry')
 
 @insert_ns.route('', methods = ['POST']) # url/user
 class GetStatus(Resource):
     @limiter.limit('1000/hour')
+    @api.marshal_with(service_insert_model_example, code=200, description='OK', as_list=False)
     @api.expect(service_insert_model)
     @cache.cached(timeout=1, query_string=True)
     @api.response(404, 'Data not found')
@@ -51,7 +52,7 @@ class GetStatus(Resource):
         # new database handler
         try:
             res =  Database().insert_service(data)
-            PrintLog.log("[service_insert] Inserting new service to the SmartCLIDE registry: \n" + json.dumps(data))
+            PrintLog.log(f"[service_insert] Inserting new service to the SmartCLIDE registry:\n{data}")
             # export the json data to csv
             try:
                 df = pd.DataFrame([data])
@@ -62,6 +63,6 @@ class GetStatus(Resource):
             if res.status_code == 200:
                 FlaskUtils.handle200error(insert_ns, "Data inserted correctly")
         except Exception as err:
-            FlaskUtils.handle500error(insert_ns, "Insert Service is unavailable, check the database configuration")
+            FlaskUtils.handle400error(insert_ns, "Insert Service is unavailable.")
 
         

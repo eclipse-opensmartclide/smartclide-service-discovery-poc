@@ -9,13 +9,14 @@ from utils import PrintLog, FlaskUtils, ConfigReader
 
 import requests
 from database.database_handler import Database
-from api.service_discovery_models import service_search_model
+from api.service_discovery_models import service_search_model, service_search_model_example
 
 search_ns = api.namespace('service_search', description='Search for a service in the SmartCLIDE registry')
 @search_ns.route('', methods = ['POST']) # url/user
 
 class GetStatus(Resource):
     @limiter.limit('1000/hour')
+    @api.marshal_with(service_search_model_example, code=200, description='OK', as_list=False)
     @api.expect(service_search_model)
     @cache.cached(timeout=1, query_string=True)
     @api.response(404, 'Data not found')
@@ -28,10 +29,10 @@ class GetStatus(Resource):
             FlaskUtils.handle400error(search_ns, "Empty POST data")
 
         # new database handler
-        try:
-            db = Database()
-        except Exception as err:
-            FlaskUtils.handle500error(search_ns, "Search Service is unavailable, check the database configuration")
+        # try:
+        #     db = Database()
+        # except Exception as err:
+        #     FlaskUtils.handle500error(search_ns, "Search Service is unavailable, check the database configuration")
 
         # Data basic validation
         # Check if we have full_name, method and description, keywords is optional
@@ -55,16 +56,20 @@ class GetStatus(Resource):
             dle_endpoint = dle_config['scheme'] + '://' + dle_config['host'] + ':' + dle_config['port'] + dle_config['endpoint']
             try:
                 response = requests.post(dle_endpoint, json=service)
-            except Exception as err:
-                FlaskUtils.handle500error(search_ns, "DLE service is unavailable, check the configuration or specify a keyword")
+            except Exception as e:
+                PrintLog.log('[Search Service] DLE service is unavailable.')
+                # DLE service is unavailable, assume the service has a generic keyword
+                
+            data['keywords'] = 'Generic Service'
             # Valid response from service classification?
             if response.ok:
-                data['keywords'] = response.json()['service_class']     
-
+                data['keywords'] = response.json()['service_class']
+            else:
+                PrintLog.log('[Search Service] DLE service is unavailable.')
+  
         # The actual search
         try:
-            PrintLog.log(f'[Service Search] Searching for service: {data}')
-            return db.search_service(data)
-            
-        except Exception as err:
-           FlaskUtils.handle500error(search_ns, "Search Service is unavailable, check the database configuration")
+            PrintLog.log(f'[Search Service] Searching for service:\n{data}')
+            #return db.search_service(data)
+        except Exception as _:
+            FlaskUtils.handle500error(search_ns, "Search Service is unavailable")

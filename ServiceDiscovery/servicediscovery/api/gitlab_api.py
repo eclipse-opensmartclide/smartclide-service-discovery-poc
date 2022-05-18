@@ -59,13 +59,8 @@ class GetGitLabRepos(Resource):
                 r = gitlab.get_from_url(from_url)
             if is_from_keyword:                
                 r = gitlab.get_from_keywords(from_keyword)
-            
-            if r.empty:
-                r_json = ""
-            else:                
-                # split records index values table columns (the default format)
-                result = r.to_json()    #orient="table")
-                r_json = json.loads(result)
+        
+            r_json = r or ""
 
         except Exception as e:
             return FlaskUtils.handle503error(gitlab_ns, 'GitLab service discovery is unavailable.')

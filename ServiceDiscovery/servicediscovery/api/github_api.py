@@ -1,14 +1,13 @@
 #!flask/bin/python
 # Eclipse Public License 2.0
 
-import json
 
 from flask_restx import Resource
 
 # scr API
 from api.api import api
 from core import cache, limiter
-from utils import FlaskUtils
+from utils import FlaskUtils, PrintLog
 from config import ServiceDiscoeryConfig
 
 # github
@@ -59,22 +58,19 @@ class GetGitHubRepos(Resource):
         # retrieve repos
         try:
             # TODO: handle more API tokens in case of limit
-            github = CrawlerGitHub(ServiceDiscoeryConfig.GITHUB_ACCESS_TOKEN_1)            
+            github = CrawlerGitHub(ServiceDiscoeryConfig.GITHUB_ACCESS_TOKEN_1)
+
             if is_from_url:                
                 r = github.get_from_url(from_url)
             if is_from_keyword:                
                 r = github.get_from_keywords(from_keyword)
             if is_from_topic:
-                r = github.get_from_topic(from_topic)
+                r = github.get_from_topic(from_topic)           
             
-            if r is None or r.empty:
-                r_json = ""
-            else:                
-                # split records index values table columns (the default format)
-                result = r.to_json(orient="records")
-                r_json = json.loads(result)
+            r_json = r or ""
 
         except Exception as e: # Config can raise an exception
+            PrintLog.error(e)
             return FlaskUtils.handle503error(github_ns, 'GitHub service discovery is unavailable.')
 
         # if there is not repos found  r_json == "", return 404 error
