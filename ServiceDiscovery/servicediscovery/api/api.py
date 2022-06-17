@@ -11,13 +11,8 @@
 #    David Berrocal Macías (@dabm-git) - initial API and implementation
 #*******************************************************************************
 
-version: '3'
+from flask_restx import Api
 
-services:
-  service_discovery:
-    restart: unless-stopped
-    build: .
-    working_dir: /app/smartclide-service-discovery-poc/ServiceDiscovery
-    command: python3 ServiceDiscovery
-    ports:
-      - "2020:2020"
+api = Api(version='1.0',
+          title='Service Discovery Flask RESTX API',
+          description="SmartCLIDE - Service Discovery Flask RESTX API")

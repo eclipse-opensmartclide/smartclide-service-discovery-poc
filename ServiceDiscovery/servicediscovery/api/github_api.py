@@ -1,18 +1,25 @@
-#!flask/bin/python
-# Eclipse Public License 2.0
-
-import json
+#*******************************************************************************
+# Copyright (C) 2022 AIR Institute
+# 
+# This program and the accompanying materials are made
+# available under the terms of the Eclipse Public License 2.0
+# which is available at https://www.eclipse.org/legal/epl-2.0/
+# 
+# SPDX-License-Identifier: EPL-2.0
+# 
+# Contributors:
+#    David Berrocal Macías (@dabm-git) - initial API and implementation
+#*******************************************************************************
 
 from flask_restx import Resource
 
 # scr API
-from api.v1 import api
+from api.api import api
 from core import cache, limiter
-from utils import FlaskUtils
+from utils import FlaskUtils, PrintLog
 from config import ServiceDiscoeryConfig
 
 # github
-from api.models.github_model import github_model
 from api.parsers.github_parser import github_argument_parser
 from repos.scr_github import CrawlerGitHub
 
@@ -26,7 +33,6 @@ class GetGitHubRepos(Resource):
     @api.response(404, 'Data not found')
     @api.response(500, 'Unhandled errors')
     @api.response(400, 'Invalid parameters')
-    #@api.marshal_with(github_model, code=200, description='OK', as_list=True)
     def get(self):
         """
         Returns a JSON array with the repo information
@@ -61,22 +67,19 @@ class GetGitHubRepos(Resource):
         # retrieve repos
         try:
             # TODO: handle more API tokens in case of limit
-            github = CrawlerGitHub(ServiceDiscoeryConfig.GITHUB_ACCESS_TOKEN_1)            
+            github = CrawlerGitHub(ServiceDiscoeryConfig.GITHUB_ACCESS_TOKEN_1)
+
             if is_from_url:                
                 r = github.get_from_url(from_url)
             if is_from_keyword:                
                 r = github.get_from_keywords(from_keyword)
             if is_from_topic:
-                r = github.get_from_topic(from_topic)
+                r = github.get_from_topic(from_topic)           
             
-            if r is None or r.empty:
-                r_json = ""
-            else:                
-                # split records index values table columns (the default format)
-                result = r.to_json(orient="records")
-                r_json = json.loads(result)
+            r_json = r or ""
 
         except Exception as e: # Config can raise an exception
+            PrintLog.log(e)
             return FlaskUtils.handle503error(github_ns, 'GitHub service discovery is unavailable.')
 
         # if there is not repos found  r_json == "", return 404 error

@@ -1,28 +1,37 @@
-#!/usr/bin/python3
-# Eclipse Public License 2.0
+#*******************************************************************************
+# Copyright (C) 2022 AIR Institute
+# 
+# This program and the accompanying materials are made
+# available under the terms of the Eclipse Public License 2.0
+# which is available at https://www.eclipse.org/legal/epl-2.0/
+# 
+# SPDX-License-Identifier: EPL-2.0
+# 
+# Contributors:
+#    David Berrocal Macías (@dabm-git) - initial API and implementation
+#*******************************************************************************
 
 import time
 import re
-import pandas as pd
 import random
 from bs4 import BeautifulSoup
 import uuid
 
 # own
-from servicediscovery.utils import SCRUtils, PrintLog
-from servicediscovery.elastic.elasticsearch import Elastic
-from servicediscovery.repos.clean_data import ServiceCrawledDataPreProcess
+from utils import SCRUtils, PrintLog
+from repos.clean_data import ServiceCrawledDataPreProcess
+from database.database_handler import Database
 
 class CrawlerBitbucket:
     preprocess = ServiceCrawledDataPreProcess()
-    elastic_end = Elastic()
 
     # Constructor
-    def __init__(self, ptoken):
+    def __init__(self):
         """
         Creates an isntance of CrawlerBitbucket using the ptoken argument.
         """
-        self.token = ptoken
+        #self.token = ptoken
+        pass
 
     # WIP    
     def get_from_url_API(self, url):
@@ -73,10 +82,10 @@ class CrawlerBitbucket:
     def get_from_keywords_web(self, keywords):
         """
         Search for repositories in BitBucket using get requests based on the keywords given.
-        The result is exported to .csv files and then loaded into a Postgre database. 
+        The result is exported to .csv files and then loaded into a database. 
         """ 
 
-        PrintLog.log("[BitBucket] Get repos started: " + keywords)
+        PrintLog.log(f"[BitBucket] Get repos started: {keywords}")
 
         # https://support.atlassian.com/bitbucket-cloud/docs/api-request-limits/
         # Git web (HTTPS://) requests           60,000 requests per hour
@@ -106,7 +115,7 @@ class CrawlerBitbucket:
                 # Get info from repo
                 repo_metadata = repo.find('ul', {"class": "repo-metadata clearfix"})
                 repo_metadata_li = repo_metadata.find_all('li')
-                
+
                 # Get description
                 try:
                     description = repo.find('p').text
@@ -115,49 +124,46 @@ class CrawlerBitbucket:
                     description = description.replace("(\'", "")
                 except AttributeError:
                     description = ""
-                
-                # Todo: handle empty
+
                 # json datarepo
                 datarepo = {
-                    "full_name": repo.find('a', {"class": "repo-link"}, href=True).text, # get repo name
-                    "description": description,
-                    "link": "https://bitbucket.org" + repo.find('a', {"class": "repo-link"}, href=True)['href'],  
-                    "stars": "-1",                 
-                    "forks": "-1",
-                    "watchers": repo_metadata_li[0].find('a').text.strip().replace(" watchers", "").replace(" watcher", ""),
-                    "updated_on": repo_metadata_li[1].find('time')['datetime'],
-                    "keywords": keyword_split,
-                    "source": "Bitbucket",
-                    "uuid" : str(uuid.uuid4()),                      
+                        "id" : str(uuid.uuid4()),
+                        "name": repo.find('a', {"class": "repo-link"}, href=True).text, # get repo name,  
+                        "user_id": "628c87f6aa5a2857398a80a0", # cte
+                        "registry_id": "628c8dab80b42501489a85da", # cte
+                        "git_credentials_id": "628c922780b42501489a85dd",
+                        "url": "https://bitbucket.org" + repo.find('a', {"class": "repo-link"}, href=True)['href'],  
+                        "description": description,
+                        "is_public": True,
+                        "licence": "",
+                        "framework": "",
+                        "created": "",
+                        "updated": repo_metadata_li[1].find('time')['datetime'],
+                        "stars": '0',
+                        "forks": '0',
+                        "watchers":  repo_metadata_li[0].find('a').text.strip().replace(" watchers", "").replace(" watcher", ""),
+                        "deployable": False,# TODO: check if deployable 
+                        "keywords": keyword_split,
                 }
                 # Append repo
                 data.append(datarepo)
-            
             # Since we use web requests it is good to wait between requests to avoid IP bans
             time.sleep(random.uniform(0.1, 0.4))
             # Repos in one page end
-
         # Max pages end
         # Create dataframe from json list & export one csv per keyword
-        df_bitbucket_web = pd.json_normalize(data=data)
-        del data
-        df_bitbucket_web.reset_index(drop=True, inplace=True)
+        if not data:
+            PrintLog.log("[BitBucket] No valid repos found for the given keywords.")  
+            return {} # empty
 
         file_name = "Bitbucket_kw_"
-
         # Clean
-        df_bitbucket_web_cleaned = self.preprocess.clean_dataframe(df_bitbucket_web)
-        del df_bitbucket_web
-        
-        if df_bitbucket_web_cleaned.empty:
-            PrintLog.log("[BitBucket] No valid repos found for the given keywords.")  
-            return df_bitbucket_web_cleaned # empty dataframe
+        data_cleaned = self.preprocess.clean_export_data(data, file_name + keyword_split)
 
-        # Export
-        SCRUtils.export_csv(df_bitbucket_web_cleaned, "./output/", file_name + keyword_split, True, True)
-
-        # Upload
-        PrintLog.log("[BitBucket] Upload to elastic called from BitBucket crawler: " + file_name + keyword_split)                  
-        self.elastic_end.upload_pandas(df_bitbucket_web_cleaned)
-
-        return df_bitbucket_web_cleaned
+        # at this point we have some data, so we can upload it to the database
+        try:
+            PrintLog.log(f"[BitBucket] Upload to database called from BitBucket crawler")
+            _ = Database().insert_service(data_cleaned)
+        except Exception as e:
+            PrintLog.log(f"[BitBucket] Error while inserting data into database: {e}")
+        return data_cleaned

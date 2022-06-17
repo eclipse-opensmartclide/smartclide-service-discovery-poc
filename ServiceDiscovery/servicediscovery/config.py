@@ -1,5 +1,15 @@
-#!/usr/bin/python3
-# Eclipse Public License 2.0
+#*******************************************************************************
+# Copyright (C) 2022 AIR Institute
+# 
+# This program and the accompanying materials are made
+# available under the terms of the Eclipse Public License 2.0
+# which is available at https://www.eclipse.org/legal/epl-2.0/
+# 
+# SPDX-License-Identifier: EPL-2.0
+# 
+# Contributors:
+#    David Berrocal Macías (@dabm-git) - initial API and implementation
+#*******************************************************************************
 
 from utils import ConfigReader
 
@@ -15,16 +25,14 @@ class FlaskConfig():
 	SSL_CERT = './certs/server.crt'
 
 # scr tokens
-class ServiceDiscoeryConfig():
-	
+class ServiceDiscoeryConfig():	
     # The tokens are examples and are not valid
 	# GitHub API
 	GITHUB_ACCESS_TOKEN_1 = ConfigReader.read_config(section='tokens')['github_token']
 	# GitLab API
 	GITLAB_ACCESS_TOKEN_1 = ConfigReader.read_config(section='tokens')['gitlab_token']
-	# BitBucket API
-	BITBUCKET_ACCESS_TOKEN_1 = ConfigReader.read_config(section='tokens')['bitbucket_token']
- 
+	# BitBucket API - not used, web crawler is used
+
 	# TODO: Handle more tokens....
 	#GITHUB_ACCESS_TOKEN_2 = ConfigReader.read_config(section='tokens')['github_token_2']
 

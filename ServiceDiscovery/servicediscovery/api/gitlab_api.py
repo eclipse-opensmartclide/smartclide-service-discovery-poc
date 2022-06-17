@@ -1,17 +1,23 @@
-#!flask/bin/python
-# Eclipse Public License 2.0
-
-import json
+#*******************************************************************************
+# Copyright (C) 2022 AIR Institute
+# 
+# This program and the accompanying materials are made
+# available under the terms of the Eclipse Public License 2.0
+# which is available at https://www.eclipse.org/legal/epl-2.0/
+# 
+# SPDX-License-Identifier: EPL-2.0
+# 
+# Contributors:
+#    David Berrocal Macías (@dabm-git) - initial API and implementation
+#*******************************************************************************
 
 from flask_restx import Resource
-
-from api.v1 import api
+from api.api import api
 from core import cache, limiter
 from utils import FlaskUtils
 from config import ServiceDiscoeryConfig
 
 # gitlab
-from api.models.gitlab_model import gitlab_model
 from api.parsers.gitlab_parser import gitlab_argument_parser
 from repos.scr_gitlab import CrawlerGitLab
 
@@ -25,13 +31,11 @@ class GetGitLabRepos(Resource):
     @api.response(404, 'Data not found')
     @api.response(500, 'Unhandled errors')
     @api.response(400, 'Invalid parameters')
-    #@api.marshal_with(gitlab_model, code=200, description='OK', as_list=True)
     def get(self):
         """
         Returns a JSON array with the repo information
         """
         # retrieve and chek arguments
-
         is_from_url = False
         is_from_keyword = False
         r_json = ""        
@@ -63,13 +67,8 @@ class GetGitLabRepos(Resource):
                 r = gitlab.get_from_url(from_url)
             if is_from_keyword:                
                 r = gitlab.get_from_keywords(from_keyword)
-            
-            if r.empty:
-                r_json = ""
-            else:                
-                # split records index values table columns (the default format)
-                result = r.to_json()    #orient="table")
-                r_json = json.loads(result)
+        
+            r_json = r or ""
 
         except Exception as e:
             return FlaskUtils.handle503error(gitlab_ns, 'GitLab service discovery is unavailable.')

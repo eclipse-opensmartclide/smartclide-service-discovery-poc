@@ -11,13 +11,6 @@
 #    David Berrocal Macías (@dabm-git) - initial API and implementation
 #*******************************************************************************
 
-version: '3'
-
-services:
-  service_discovery:
-    restart: unless-stopped
-    build: .
-    working_dir: /app/smartclide-service-discovery-poc/ServiceDiscovery
-    command: python3 ServiceDiscovery
-    ports:
-      - "2020:2020"
+python3 -m pip install --no-cache-dir -r requirements.txt
+python3 -m pip install . --upgrade
+python3 ServiceDiscovery

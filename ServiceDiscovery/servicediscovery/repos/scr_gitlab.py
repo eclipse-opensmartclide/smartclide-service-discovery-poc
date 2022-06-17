@@ -1,21 +1,29 @@
-#!/usr/bin/python3
-# Eclipse Public License 2.0
+#*******************************************************************************
+# Copyright (C) 2022 AIR Institute
+# 
+# This program and the accompanying materials are made
+# available under the terms of the Eclipse Public License 2.0
+# which is available at https://www.eclipse.org/legal/epl-2.0/
+# 
+# SPDX-License-Identifier: EPL-2.0
+# 
+# Contributors:
+#    David Berrocal Macías (@dabm-git) - initial API and implementation
+#*******************************************************************************
 
 import time
 import random
-import pandas as pd
 import re
 import uuid
 
 # own
-from servicediscovery.utils import SCRUtils, PrintLog
-from servicediscovery.elastic.elasticsearch import Elastic
-from servicediscovery.repos.clean_data import ServiceCrawledDataPreProcess
+from utils import SCRUtils, PrintLog
+from database.database_handler import Database
+from repos.clean_data import ServiceCrawledDataPreProcess
 
 class CrawlerGitLab:
 
     preprocess = ServiceCrawledDataPreProcess()
-    elastic_end = Elastic()
 
     # constructor
     def __init__(self, ptoken):
@@ -58,10 +66,10 @@ class CrawlerGitLab:
         url = ""
         w_flag = True
 
-        PrintLog.log("[GitLab] Get repos started: " + payload)
+        PrintLog.log(f"[GitLab] Get repos started: {payload}")
 
         # Iterate pages
-        while (w_flag):        
+        while w_flag:
             if from_url:
                 # https://docs.gitlab.com/ee/api/projects.html          
                 url = f"https://gitlab.com/api/v4/users/{payload}/projects?simple=1&per_page=100&page={page}"
@@ -71,9 +79,14 @@ class CrawlerGitLab:
 
             # GitLab API v4 "Bearer + token"
             # TODO: handle more API tokens in case of limit
-            header = {'Authorization': "Bearer " + self.token}
+            header = {'Authorization': f"Bearer {self.token}"}
 
             response = SCRUtils.get_url(url, header)
+
+            if response.status_code < 200 or response.status_code >= 300:
+                PrintLog.log(f"[GitLab] Error: {response.status_code}, Bad creditentials? Check the token.")
+                raise Exception("Bad Creditentials")
+
             headers = response.headers # Next-Page
             response_json = response.json()
 
@@ -84,41 +97,50 @@ class CrawlerGitLab:
                     continue
 
                 # Make sure we dont have KeyError
-                #if('id' not in repo): repo['id'] = ""
-                     
+                # TODO, GET /projects/:id/languages %
+
                 description = ""
                 if(repo['description'] is not None):
                     description = " ".join(re.split("\s+", repo['description'])) # remplace with spaces " "
                 if('path' not in repo): repo['path'] = ""
-                if('last_activity_at' not in repo): repo['last_activity_at'] = ""                         
-                if('tag_list' not in repo): repo['tag_list'] = ""            
-                if('web_url' not in repo): repo['web_url'] = ""   
+                if('last_activity_at' not in repo): repo['last_activity_at'] = ""
+                if('created_at' not in repo): repo['created_at'] = ""
+                if('topics' not in repo): repo['topics'] = ""
+                if('web_url' not in repo): repo['web_url'] = ""
                 if('star_count' not in repo): repo['star_count'] = ""
                 if('forks_count' not in repo): repo['forks_count'] = ""
+                if('license' not in repo): 
+                    repo['license'] = {}
+                    repo['license']['name'] = ""
 
                 # If we have more tags, merge them with the current kw
-                merged_kw = payload.replace("+",",")        
-                if repo['tag_list']:
-                    repo_tags = ','.join(repo['tag_list'])                  
-                    merged_kw = merged_kw + "," + repo_tags                
+                merged_kw = payload.replace("+",",")
+                if repo['topics']:
+                    repo_tags = ','.join(repo['topics'])
+                    merged_kw = f"{merged_kw},{repo_tags}"               
 
                 # Create json repo
                 datarepo = {
-                    "full_name": repo['path'],  
-                    "description": description,                    
-                    "link": repo['web_url'],
+                    "id" : str(uuid.uuid4()),
+                    "name": repo['path'],  
+                    "user_id": "ee123203cb634a4eb9edd7ec582d099f",
+                    "registry_id": "bb123213ad223a45ba1d7sdc582d055e",
+                    "git_credentials_id": "628c922780b42501489a85dd",
+                    "url": repo['web_url'],
+                    "description": description,
+                    "is_public": True,
+                    "licence": repo['license']['name'],
+                    "framework": "",
+                    "created": repo['created_at'],
+                    "updated": repo['last_activity_at'],
                     "stars": repo['star_count'],                 
                     "forks": repo['forks_count'],
-                    "watchers": "-1",           
-                    "updated_on": repo['last_activity_at'],                    
-                    "keywords": merged_kw,
-                    "source": "GitLab",
-                    "uuid" : str(uuid.uuid4())
+                    "watchers": "0",
+                    "deployable": False, #TODO: check if deployable     
+                    "keywords": merged_kw,        
                 }
-
                 # Add json to data list
                 data.append(datarepo)
-
                 # Random delay to avoid requests timeout
                 time.sleep(random.uniform(0.1, 0.3))
 
@@ -127,20 +149,11 @@ class CrawlerGitLab:
                 w_flag = False
             else:
                 page += 1
-        
-        # While end
-        # Create dataframe from json list & export one csv per keyword
-        df_gitlab = pd.json_normalize(data=data)
-        del data
-        df_gitlab.reset_index(drop=True, inplace=True)
 
-        # Clean
-        df_gitlab_cleaned = self.preprocess.clean_dataframe(df_gitlab)
-        del df_gitlab
-
-        if df_gitlab_cleaned.empty:
-            PrintLog.log("[GitLab] No valid repos found for the given keywords.")  
-            return df_gitlab_cleaned # empty dataframe
+        # While ended, export to csv and load into database
+        if not data:
+            PrintLog.log("[GitLab] No valid repos found for the given input.")  
+            return {} # empty
 
         file_name = "GitLab_"
         if from_url:
@@ -148,13 +161,17 @@ class CrawlerGitLab:
         if from_keywords:
             file_name = "GitLab_kw_"
 
-        # Export
-        SCRUtils.export_csv(df_gitlab_cleaned, "./output/", file_name + payload, True, True) 
-        # Upload
-        PrintLog.log("[GitLab] Upload pandas called from GitLab crawler: " + file_name + merged_kw)                  
-        self.elastic_end.upload_pandas(df_gitlab_cleaned)
-        
-        return df_gitlab_cleaned
+        # Clean
+        data_cleaned = self.preprocess.clean_export_data(data, file_name + payload)
+     
+        # at this point we have some data, so we can upload it to the database
+        try:
+            PrintLog.log(f"[GitLab] Upload to database called from GitLab crawler")
+            _ = Database().insert_service(data_cleaned)
+        except Exception as e:
+            PrintLog.log(f"[GitLab] Error while inserting data into database: {e}")
+
+        return data_cleaned
 
 
         

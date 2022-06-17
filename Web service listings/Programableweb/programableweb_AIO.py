@@ -1,16 +1,23 @@
-#!/usr/bin/python3
-# Eclipse Public License 2.0
-
-# MAINTAINER: dabm@air-institute.org
+#*******************************************************************************
+# Copyright (C) 2022 AIR Institute
+# 
+# This program and the accompanying materials are made
+# available under the terms of the Eclipse Public License 2.0
+# which is available at https://www.eclipse.org/legal/epl-2.0/
+# 
+# SPDX-License-Identifier: EPL-2.0
+# 
+# Contributors:
+#    David Berrocal Macías (@dabm-git) - initial API and implementation
+#*******************************************************************************
 
 """ Programableweb
-
 !pip install requests-random-user-agent
 !pip install pandas
 !pip install bs4
 !pip install lxml
-
 """
+
 import time
 from datetime import datetime
 import os
@@ -26,7 +33,6 @@ import re
 
 pd.options.mode.chained_assignment = None
 # List url processing
-
 
 class ProgWeb:
     @staticmethod
@@ -598,8 +604,6 @@ class Utils:
             return pd.DataFrame()
 
 # DW
-
-
 def download_data(dataType, url, numPages, numWorkers, listName, batchName, forceListUpdate):
     """
     Creates a DataFrame from dataType programmableweb URL
@@ -697,7 +701,6 @@ def download_data(dataType, url, numPages, numWorkers, listName, batchName, forc
     return df_temp
 
 # CONSTANTS
-
 # Relative path
 FILES_PATH = Path(__file__).parent
 
@@ -739,9 +742,7 @@ API_TYPE = "API"
 
 """### Wait btw types to avoid 429
 TODO?: handle 429 with proxys?
-
 """
-
 # print("\nFRAME")
 # df_frame = download_data(FRAME_TYPE, FRAME_URL, FRAME_PAGES, 20,
 #                          FRAME_LIST, FRAME_BATCH, False)

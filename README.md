@@ -1,5 +1,5 @@
 # Service Discovery API - SmartCLIDE
-Maintainer:  AIR Institute
+Maintainer:  @dabm-git - AIR Institute
 
 ## Configure 
 This package relies on tokens from GitGub, GitLab and BitBucket APIs that are configured in the config.ini file in the root of the service.
@@ -21,6 +21,9 @@ python3 servicediscovery
 ```
 
 Or using the built docker image hosted by ghcr.io, with docker-compose.
+```
+docker-compose up
+```
 
 ```
 version: '3'
@@ -30,21 +33,20 @@ services:
     restart: unless-stopped
     image: ghcr.io/eclipse-researchlabs/smartclide/service-discovery:2022-04-04
     working_dir: /app/smartclide-service-discovery-poc/ServiceDiscovery
-    command: python3 servicediscovery
+    command: python3 ServiceDiscovery
     ports:
       - "2020:2020"
 ```
 
-Be sure to replace the necessary configuration in the [config.ini](https://github.com/eclipse-researchlabs/smartclide-service-discovery-poc/blob/main/ServiceDiscovery/config.ini) file, to do this you can overwrite it:
+Be sure to replace the necessary configuration in the [config.ini](https://github.com/eclipse-researchlabs/smartclide-service-discovery-poc/blob/main/ServiceDiscovery/config.ini) file, to do this you can overwrite it with the following section in docker-compose.yml:
 ```
 volumes:
  -./config.ini:/app/smartclide-service-discovery-poc/ServiceDiscovery/config.ini
 ```
 
 
-
 # Web service listings - SmartCLIDE
-Maintainer:  AIR Institute
+Maintainer:  @dabm-git - AIR Institute
 
 ## Run
 This script collects information from Programableweb, to avoid saturation and blocking of IP addresses by a high number of requests, this script can be executed on a regular basis, obtaining a section each time.
