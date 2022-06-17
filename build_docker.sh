@@ -13,5 +13,3 @@
 
 docker build --tag ghcr.io/eclipse-researchlabs/smartclide/service-discovery:$(date +'%Y-%m-%d') .
 docker push ghcr.io/eclipse-researchlabs/smartclide/service-discovery:$(date +'%Y-%m-%d')
-#docker build --tag ghcr.io/eclipse-researchlabs/smartclide/service-discovery:latest .
-#docker push ghcr.io/eclipse-researchlabs/smartclide/service-discovery:latest
