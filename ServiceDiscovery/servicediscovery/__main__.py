@@ -1,5 +1,15 @@
-#!/flask/bin/python
-# Eclipse Public License 2.0
+#*******************************************************************************
+# Copyright (C) 2022 AIR Institute
+# 
+# This program and the accompanying materials are made
+# available under the terms of the Eclipse Public License 2.0
+# which is available at https://www.eclipse.org/legal/epl-2.0/
+# 
+# SPDX-License-Identifier: EPL-2.0
+# 
+# Contributors:
+#    David Berrocal Macías (@dabm-git) - initial API and implementation
+#*******************************************************************************
 
 from flask import Flask, Blueprint, redirect, request
 from flask_cors import CORS
@@ -23,7 +33,7 @@ from api.insert_api import insert_ns
 app = Flask(__name__)
 
 VERSION = (1, 0)
-AUTHOR = 'AIR - (dabm@air-institute.org)'
+AUTHOR = 'David Berrocal Macías - AIR Institute (dberrocal@air-institute.com)'
 
 namespaces = [ github_ns, gitlab_ns, bitbucket_ns, search_ns, insert_ns ]
 

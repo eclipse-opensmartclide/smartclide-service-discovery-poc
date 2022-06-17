@@ -1,15 +1,25 @@
-#!flask/bin/python
-# Eclipse Public License 2.0
+#*******************************************************************************
+# Copyright (C) 2022 AIR Institute
+# 
+# This program and the accompanying materials are made
+# available under the terms of the Eclipse Public License 2.0
+# which is available at https://www.eclipse.org/legal/epl-2.0/
+# 
+# SPDX-License-Identifier: EPL-2.0
+# 
+# Contributors:
+#    David Berrocal Macías (@dabm-git) - initial API and implementation
+#*******************************************************************************
 
 from datetime import datetime, time
 import requests
 import logging
 from configparser import ConfigParser
+import pandas as pd
 
 # User-Agents are randomized per-session or per-request.
 #  a random User-Agent is selected from the list useragents.txt (inside the requests_random_user_agent package)
 import requests_random_user_agent
-
 
 class ConfigReader():
     def read_config(section, filename='config.ini'):
@@ -53,12 +63,13 @@ class SCRUtils():
             
         return response
 
-    def export_csv(df, path, name, export_index, export_header):
+    def export_csv(data, name, export_index, export_header):
         """
         Function to export a DataFrame in the path, with a name + timestamp, and export index and/or header
-        """
-        # Try?
-        df.to_csv(path + name + '_' + datetime.now().strftime('%d_%m_%Y') + '.csv',
+        """           
+        path = "./output/"
+        # data is a json, covert to pandas dataframe
+        data.to_csv(path + name + '_' + datetime.now().strftime('%d_%m_%Y') + '.csv',
             index=export_index,
             header=export_header)
 # flask errors    

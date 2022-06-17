@@ -1,5 +1,15 @@
-#!flask/bin/python
-# Eclipse Public License 2.0
+#*******************************************************************************
+# Copyright (C) 2022 AIR Institute
+# 
+# This program and the accompanying materials are made
+# available under the terms of the Eclipse Public License 2.0
+# which is available at https://www.eclipse.org/legal/epl-2.0/
+# 
+# SPDX-License-Identifier: EPL-2.0
+# 
+# Contributors:
+#    David Berrocal Macías (@dabm-git) - initial API and implementation
+#*******************************************************************************
 
 from flask import request
 from flask_restx import Resource
@@ -27,12 +37,6 @@ class GetStatus(Resource):
         # get data from POST
         if (data := request.get_json()) is None:                
             FlaskUtils.handle400error(search_ns, "Empty POST data")
-
-        # new database handler
-        try:
-            db = Database()
-        except Exception as err:
-            FlaskUtils.handle500error(search_ns, "Search Service is unavailable")
 
         # Data basic validation
         # Check if we have full_name, method and description, keywords is optional
@@ -70,6 +74,6 @@ class GetStatus(Resource):
         # The actual search
         try:
             PrintLog.log(f'[Search Service] Searching for service:\n{data}')
-            return db.search_service(data)
+            return Database().search_service(data)
         except Exception as _:
             FlaskUtils.handle500error(search_ns, "Search Service is unavailable")

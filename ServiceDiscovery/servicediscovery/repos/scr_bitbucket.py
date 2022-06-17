@@ -1,5 +1,15 @@
-#!/usr/bin/python3
-# Eclipse Public License 2.0
+#*******************************************************************************
+# Copyright (C) 2022 AIR Institute
+# 
+# This program and the accompanying materials are made
+# available under the terms of the Eclipse Public License 2.0
+# which is available at https://www.eclipse.org/legal/epl-2.0/
+# 
+# SPDX-License-Identifier: EPL-2.0
+# 
+# Contributors:
+#    David Berrocal Macías (@dabm-git) - initial API and implementation
+#*******************************************************************************
 
 import time
 import re
@@ -115,49 +125,45 @@ class CrawlerBitbucket:
                 except AttributeError:
                     description = ""
 
-                # Todo: handle empty
                 # json datarepo
                 datarepo = {
-                    "full_name": repo.find('a', {"class": "repo-link"}, href=True).text, # get repo name
-                    "description": description,
-                    "link": "https://bitbucket.org" + repo.find('a', {"class": "repo-link"}, href=True)['href'],  
-                    "stars": "-1",                
-                    "forks": "-1",
-                    "watchers": repo_metadata_li[0].find('a').text.strip().replace(" watchers", "").replace(" watcher", ""),
-                    "updated_on": repo_metadata_li[1].find('time')['datetime'],
-                    "keywords": keyword_split,
-                    "source": "Bitbucket",
-                    "uuid" : str(uuid.uuid4()),                      
+                        "id" : str(uuid.uuid4()),
+                        "name": repo.find('a', {"class": "repo-link"}, href=True).text, # get repo name,  
+                        "user_id": "628c87f6aa5a2857398a80a0", # cte
+                        "registry_id": "628c8dab80b42501489a85da", # cte
+                        "git_credentials_id": "628c922780b42501489a85dd",
+                        "url": "https://bitbucket.org" + repo.find('a', {"class": "repo-link"}, href=True)['href'],  
+                        "description": description,
+                        "is_public": True,
+                        "licence": "",
+                        "framework": "",
+                        "created": "",
+                        "updated": repo_metadata_li[1].find('time')['datetime'],
+                        "stars": '0',
+                        "forks": '0',
+                        "watchers":  repo_metadata_li[0].find('a').text.strip().replace(" watchers", "").replace(" watcher", ""),
+                        "deployable": False,# TODO: check if deployable 
+                        "keywords": keyword_split,
                 }
                 # Append repo
                 data.append(datarepo)
-
             # Since we use web requests it is good to wait between requests to avoid IP bans
             time.sleep(random.uniform(0.1, 0.4))
             # Repos in one page end
-
         # Max pages end
         # Create dataframe from json list & export one csv per keyword
-
         if not data:
             PrintLog.log("[BitBucket] No valid repos found for the given keywords.")  
             return {} # empty
 
         file_name = "Bitbucket_kw_"
-
         # Clean
-        df_bitbucket_web_cleaned = self.preprocess.clean_data(data)
+        data_cleaned = self.preprocess.clean_export_data(data, file_name + keyword_split)
 
-        # Export
-        SCRUtils.export_csv(df_bitbucket_web_cleaned, "./output/", file_name + keyword_split, True, True)
-
-        PrintLog.log(f"[BitBucket] Upload to database called from BitBucket crawler: {data}")
-
-        # upload to Database
-        json_data = df_bitbucket_web_cleaned.to_json(orient='records')
         # at this point we have some data, so we can upload it to the database
         try:
-            _ = Database().insert_service(json_data)
+            PrintLog.log(f"[BitBucket] Upload to database called from BitBucket crawler")
+            _ = Database().insert_service(data_cleaned)
         except Exception as e:
-            PrintLog.log(f"[GitHub] Error while inserting data into database: {e}")
-        return json_data
+            PrintLog.log(f"[BitBucket] Error while inserting data into database: {e}")
+        return data_cleaned

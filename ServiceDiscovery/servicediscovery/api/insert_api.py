@@ -1,5 +1,15 @@
-#!flask/bin/python
-# Eclipse Public License 2.0
+#*******************************************************************************
+# Copyright (C) 2022 AIR Institute
+# 
+# This program and the accompanying materials are made
+# available under the terms of the Eclipse Public License 2.0
+# which is available at https://www.eclipse.org/legal/epl-2.0/
+# 
+# SPDX-License-Identifier: EPL-2.0
+# 
+# Contributors:
+#    David Berrocal Macías (@dabm-git) - initial API and implementation
+#*******************************************************************************
 
 from flask_restx import Resource
 from flask import request
@@ -28,12 +38,6 @@ class GetStatus(Resource):
         if not (data := request.get_json()):
             FlaskUtils.handle400error(insert_ns, "Empty POST data")   
                      
-        try:
-            db = Database()
-        except Exception as err:
-            FlaskUtils.handle500error(insert_ns, "Search Service is unavailable")
-
-
         # check if df have all the right columns
         if not {
             'full_name',
@@ -57,7 +61,7 @@ class GetStatus(Resource):
 
         # new database handler
         try:
-            res =  db.insert_service(data)
+            res = Database().insert_service(data)
             PrintLog.log(f"[service_insert] Inserting new service to the SmartCLIDE registry:\n{data}")
             # export the json data to csv
             try:

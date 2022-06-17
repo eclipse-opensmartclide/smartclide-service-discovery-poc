@@ -1,47 +1,48 @@
-#!flask/bin/python
-# Eclipse Public License 2.0
+#*******************************************************************************
+# Copyright (C) 2022 AIR Institute
+# 
+# This program and the accompanying materials are made
+# available under the terms of the Eclipse Public License 2.0
+# which is available at https://www.eclipse.org/legal/epl-2.0/
+# 
+# SPDX-License-Identifier: EPL-2.0
+# 
+# Contributors:
+#    David Berrocal Macías (@dabm-git) - initial API and implementation
+#*******************************************************************************
 
 import requests
+import dateutil.parser as parser
+import dateutil.tz as tz
+
+# Own
 from utils import ConfigReader, PrintLog
 
-# Mongo database handler, search and insert services
+# Database handler, search and insert services
 class Database():
 
     host = ''
-    port = ''
     scheme = ''
-    search_endpoint = ''
-    insert_endpoint = ''
-    status_endpoint = ''
-
+    registry_endpoint = ''
+    services_endpoint = ''
+    header = ''
+  
     # Parse the config file
     def __init__(self):
         database_config = ConfigReader.read_config(section='database')
-        self.host = database_config['host']
-        self.port = database_config['port']
         self.scheme = database_config['scheme']
-        self.insert_endpoint = database_config['insert_endpoint']
-        self.search_endpoint = database_config['search_endpoint']
-        self.status_endpoint = database_config['status_endpoint']
-        self.database_endpoint = f'{self.scheme}://{self.host}:{self.port}'
-
-        # if the database is not available, raise an error
-        if self._get_status() is None:
-            raise Exception('[Database] Database is not available')
-
-    
-    # check status of the database?
-    def _get_status(self):
-        return self._get(self.status_endpoint, None)
-
+        self.host = database_config['host']
+        self.header = {'Authorization': f"Bearer {database_config['token']}"}
+        self.registry_endpoint = database_config['registry_endpoint']
+        self.services_endpoint = database_config['services_endpoint']
+        self.database_endpoint = f'{self.scheme}://{self.host}'
 
     # Get handler
     def _get(self, endpoint, data):
-        try:
-            res = requests.get(self.database_endpoint + endpoint, json = data)
-            # handle error codes
-            if res.status_code != 200:
-                raise Exception(f'[Database] Bad response: {res.status_code}')
+        try:                      
+            res = requests.get(self.database_endpoint + endpoint, headers=self.header, json = data)        
+            if res.status_code < 199 and res.status_code > 300:
+                raise Exception(f'{res}')
             return res
         except Exception as error:
             PrintLog.log(f'[Database] Error in get(): {str(error)}')
@@ -50,20 +51,53 @@ class Database():
     # Post handler
     def _post(self, endpoint, data):
         try:
-            res = requests.post(self.database_endpoint + endpoint, json = data)
-            # handle error codes
-            if res.status_code != 200:
-                PrintLog.log(f'[Database] Error: {res.status_code}')                
+            res = requests.post(self.database_endpoint + endpoint, headers=self.header, json=data)            
+            if res.status_code < 199 and res.status_code > 300:
+                raise Exception(f'{res}')
             return res
         except Exception as error:
             PrintLog.log(f'[Database] Error in post(): {str(error)}')
             return None
 
-    # Insert a service
+    # Insert a service, data is a list of json objects
     def insert_service(self, data):
-        return self._post(self.insert_endpoint, data)
+        # for each service insert it in the database
+        for service in data:
+            # set dates to iso format
+            try:
+                service['created'] = parser.parse(service['created']).replace(tzinfo=tz.gettz('UTC')).isoformat()
+            except:
+                service['created'] = ""
+            try:
+                service['updated'] = parser.parse(service['updated']).replace(tzinfo=tz.gettz('UTC')).isoformat()  
+            except:
+                service['updated'] = ""
+                         
+            # keywords to list
+            keywords = service['keywords']
+            if keywords is not None:
+                keywords = keywords.split(',')
+                service['keywords'] = keywords
+            else:
+                service['keywords'] = []
+    
+            res = self._post(self.services_endpoint, service)  
+        # for end          
+        return res
+        #return self._post(self.services_endpoint, data)
+    
+    def get_service_registries(self):
+        return self._get(self.registry_endpoint, None)
 
-    # Search for a service
-    def search_service(self, data):
-        return self._post(self.search_endpoint, data)
+    def get_service_registry(self, registry_id):
+        return self._get(f'{self.registry_endpoint}/{registry_id}', None)    
+
+    def post_service_registry(self, data):
+        return self._post(self.registry_endpoint, data)
+    
+    def get_services(self, data):
+        return self._get(self.services_endpoint, data)
+
+    def get_service(self, service_id):
+        return self._get(f'{self.services_endpoint}/{service_id}', None)
     

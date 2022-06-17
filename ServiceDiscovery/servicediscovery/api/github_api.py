@@ -1,6 +1,15 @@
-#!flask/bin/python
-# Eclipse Public License 2.0
-
+#*******************************************************************************
+# Copyright (C) 2022 AIR Institute
+# 
+# This program and the accompanying materials are made
+# available under the terms of the Eclipse Public License 2.0
+# which is available at https://www.eclipse.org/legal/epl-2.0/
+# 
+# SPDX-License-Identifier: EPL-2.0
+# 
+# Contributors:
+#    David Berrocal Macías (@dabm-git) - initial API and implementation
+#*******************************************************************************
 
 from flask_restx import Resource
 
@@ -70,7 +79,7 @@ class GetGitHubRepos(Resource):
             r_json = r or ""
 
         except Exception as e: # Config can raise an exception
-            PrintLog.error(e)
+            PrintLog.log(e)
             return FlaskUtils.handle503error(github_ns, 'GitHub service discovery is unavailable.')
 
         # if there is not repos found  r_json == "", return 404 error

@@ -1,3 +1,16 @@
+#*******************************************************************************
+# Copyright (C) 2022 AIR Institute
+# 
+# This program and the accompanying materials are made
+# available under the terms of the Eclipse Public License 2.0
+# which is available at https://www.eclipse.org/legal/epl-2.0/
+# 
+# SPDX-License-Identifier: EPL-2.0
+# 
+# Contributors:
+#    David Berrocal Macías (@dabm-git) - initial API and implementation
+#*******************************************************************************
+
 version: '3'
 
 services:
@@ -5,6 +18,6 @@ services:
     restart: unless-stopped
     build: .
     working_dir: /app/smartclide-service-discovery-poc/ServiceDiscovery
-    command: python3 servicediscovery
+    command: python3 ServiceDiscovery
     ports:
       - "2020:2020"

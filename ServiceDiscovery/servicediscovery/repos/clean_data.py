@@ -1,5 +1,15 @@
-#!/usr/bin/python3
-# Eclipse Public License 2.0
+#*******************************************************************************
+# Copyright (C) 2022 AIR Institute
+# 
+# This program and the accompanying materials are made
+# available under the terms of the Eclipse Public License 2.0
+# which is available at https://www.eclipse.org/legal/epl-2.0/
+# 
+# SPDX-License-Identifier: EPL-2.0
+# 
+# Contributors:
+#    David Berrocal Macías (@dabm-git) - initial API and implementation
+#*******************************************************************************
 
 import pandas as pd
 import os
@@ -7,17 +17,34 @@ import glob
 from langdetect import detect
 import re
 import numpy as np
+from utils import SCRUtils
 
 class ServiceCrawledDataPreProcess:
 
     df_crawled = pd.DataFrame()
 
-    def clean_data(self, df):
+    def clean_export_data(self, data_list, file_name):         
+        # convert the list data_list to dataframe
+        df = pd.DataFrame(data_list, columns=[
+                "id",
+                "name",
+                "user_id",
+                "registry_id",
+                "git_credentials_id",
+                "url",
+                "description",
+                "is_public",
+                "licence",
+                "framework",
+                "created",
+                "updated",
+                "stars",
+                "forks",
+                "watchers",
+                "deployable",
+                "keywords",
+            ])
 
-        # if the type of df is not dataframe, convert it to dataframe
-        if not isinstance(df, pd.DataFrame):
-            df = pd.DataFrame(df)
-        
         if df is not None:
             self.df_crawled = df
         
@@ -34,9 +61,11 @@ class ServiceCrawledDataPreProcess:
             # filter based on len
             self.df_crawled = self.filter_based_len("description")
         
-        self.df_crawled = self.remove_null("keywords")
-     
-        return self.df_crawled
+        self.df_crawled = self.remove_null("keywords")  
+        # Export the dataframe to csv file          
+        SCRUtils.export_csv(self.df_crawled, file_name, True, True)
+        
+        return self.df_crawled.to_dict(orient='records')
         
     def load_crawled_data(self):
         #,full_name,link,description,stars,forks,watchers,updated_on,keywords,source

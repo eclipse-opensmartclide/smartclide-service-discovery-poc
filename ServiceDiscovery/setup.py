@@ -1,5 +1,15 @@
-#!/usr/bin/python3
-# Eclipse Public License 2.0
+#*******************************************************************************
+# Copyright (C) 2022 AIR Institute
+# 
+# This program and the accompanying materials are made
+# available under the terms of the Eclipse Public License 2.0
+# which is available at https://www.eclipse.org/legal/epl-2.0/
+# 
+# SPDX-License-Identifier: EPL-2.0
+# 
+# Contributors:
+#    David Berrocal Macías (@dabm-git) - initial API and implementation
+#*******************************************************************************
 
 import io
 from setuptools import setup, find_packages
@@ -20,8 +30,8 @@ setup(
     url='',
     download_url='https://github.com/eclipse-researchlabs/smartclide-service-discovery-poc/archive/refs/heads/main.zip',
     license='Eclipse Public License 2.0',
-    author='AIR Institute',
-    author_email='dabm@air-institute.org',
+    author='David Berrocal Macías - AIR Institute',
+    author_email='dberrocal@air-institute.com',
     description='SmartCLIDE - Flask RESTX API for Service Discovery',
     long_description=readme(),
     long_description_content_type='text/markdown',
