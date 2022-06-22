@@ -27,15 +27,13 @@ from utils import PrintLog
 from api.github_api import github_ns
 from api.gitlab_api import gitlab_ns
 from api.bitbucket_api import bitbucket_ns
-from api.search_api import search_ns
-from api.insert_api import insert_ns
 
 app = Flask(__name__)
 
 VERSION = (1, 0)
 AUTHOR = 'David Berrocal Macías - AIR Institute (dberrocal@air-institute.com)'
 
-namespaces = [ github_ns, gitlab_ns, bitbucket_ns, search_ns, insert_ns ]
+namespaces = [ github_ns, gitlab_ns, bitbucket_ns]# ,search_ns, insert_ns]
 
 def get_version():
     """
