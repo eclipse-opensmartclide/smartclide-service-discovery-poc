@@ -107,8 +107,8 @@ class CrawlerGitLab:
                 if('created_at' not in repo): repo['created_at'] = ""
                 if('topics' not in repo): repo['topics'] = ""
                 if('web_url' not in repo): repo['web_url'] = ""
-                if('star_count' not in repo): repo['star_count'] = ""
-                if('forks_count' not in repo): repo['forks_count'] = ""
+                if('star_count' not in repo): repo['star_count'] = "0"
+                if('forks_count' not in repo): repo['forks_count'] = "0"
                 if('license' not in repo): 
                     repo['license'] = {}
                     repo['license']['name'] = ""
@@ -117,7 +117,9 @@ class CrawlerGitLab:
                 merged_kw = payload.replace("+",",")
                 if repo['topics']:
                     repo_tags = ','.join(repo['topics'])
-                    merged_kw = f"{merged_kw},{repo_tags}"               
+                    merged_kw = f"{merged_kw},{repo_tags}" 
+
+                merged_kw_list = merged_kw.split(',')
 
                 # Create json repo
                 datarepo = {
@@ -133,11 +135,11 @@ class CrawlerGitLab:
                     "framework": "",
                     "created": repo['created_at'],
                     "updated": repo['last_activity_at'],
-                    "stars": repo['star_count'],                 
-                    "forks": repo['forks_count'],
-                    "watchers": "0",
-                    "deployable": False, #TODO: check if deployable     
-                    "keywords": merged_kw,        
+                    "stars": int(repo['star_count']),                 
+                    "forks": int(repo['forks_count']),
+                    "watchers": int("0"),
+                    "deployable": 0, #TODO: check if deployable     
+                    "keywords": merged_kw_list,        
                 }
                 # Add json to data list
                 data.append(datarepo)

@@ -148,15 +148,15 @@ class CrawlerGitHub:
                     language = str(repo.language)
                     updated_at =  str(repo.updated_at)
                     created_at = str(repo.created_at)
-                    deployable = False 
+                    deployable = 0 
 
                     try:
                         # check if the repo has a deploy file
                         has_dockerfile = repo.get_contents("Dockerfile")
                         if has_dockerfile:
-                            deployable = True                        
+                            deployable = 1                        
                     except GithubException:
-                        deployable = False
+                        deployable = 0
 
                     try:
                         # get the license name
@@ -169,11 +169,14 @@ class CrawlerGitHub:
                     watchers = str(repo.watchers_count)
 
                     # + spacer due , is used in the .csv
-                    topics = '+'.join(repo.get_topics())
-                    # If we have more topics, merge them with the kw
-                    merged_kw = keywords
+                    topics = ','.join(repo.get_topics())
+                    
+                    # If we have more topics, merge them with the kw                    
+                    merged_kw = keywords.replace('+', ',')                    
                     if topics:
-                        merged_kw = f"{keywords}+{topics}"
+                        merged_kw = f"{keywords},{topics}"    
+
+                    merged_kw_list = merged_kw.split(',')
 
                     # Get the repo name from url
                     # Find the word after url / and remove .git
@@ -194,11 +197,11 @@ class CrawlerGitHub:
                         "framework": language,
                         "created": created_at,
                         "updated": updated_at, 
-                        "stars": stars,
-                        "forks": forks, 
-                        "watchers": watchers,  
+                        "stars": int(stars),
+                        "forks": int(forks), 
+                        "watchers": int(watchers),  
                         "deployable": deployable,                    
-                        "keywords": merged_kw,      
+                        "keywords": merged_kw_list,      
                     }
                     data.append(datarepo)
 

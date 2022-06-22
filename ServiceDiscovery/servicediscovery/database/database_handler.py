@@ -61,6 +61,9 @@ class Database():
 
     # Insert a service, data is a list of json objects
     def insert_service(self, data):
+        # open a local document for writing debug purposes     
+        #file = open('services.json', 'a+')
+
         # for each service insert it in the database
         for service in data:
             # set dates to iso format
@@ -73,14 +76,8 @@ class Database():
             except:
                 service['updated'] = ""
                          
-            # keywords to list
-            keywords = service['keywords']
-            if keywords is not None:
-                keywords = keywords.split(',')
-                service['keywords'] = keywords
-            else:
-                service['keywords'] = []
-    
+            # appedn to the file
+            #file.write(f'{service}\n')
             res = self._post(self.services_endpoint, service)  
         # for end          
         return res

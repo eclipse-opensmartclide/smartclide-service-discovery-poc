@@ -124,6 +124,8 @@ class CrawlerBitbucket:
                     description = description.replace("(\'", "")
                 except AttributeError:
                     description = ""
+                
+                keyword_split_list = keyword_split.split(',')
 
                 # json datarepo
                 datarepo = {
@@ -139,11 +141,11 @@ class CrawlerBitbucket:
                         "framework": "",
                         "created": "",
                         "updated": repo_metadata_li[1].find('time')['datetime'],
-                        "stars": '0',
-                        "forks": '0',
-                        "watchers":  repo_metadata_li[0].find('a').text.strip().replace(" watchers", "").replace(" watcher", ""),
-                        "deployable": False,# TODO: check if deployable 
-                        "keywords": keyword_split,
+                        "stars": int('0'),
+                        "forks": int('0'),
+                        "watchers":  int(repo_metadata_li[0].find('a').text.strip().replace(" watchers", "").replace(" watcher", "")),
+                        "deployable": 0,# TODO: check if deployable 
+                        "keywords": keyword_split_list,
                 }
                 # Append repo
                 data.append(datarepo)
