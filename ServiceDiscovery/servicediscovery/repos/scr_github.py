@@ -17,6 +17,8 @@ import requests # requests.exceptions.Timeout
 import re
 import uuid
 import json
+import dateutil.parser as parser
+import dateutil.tz as tz
 
 # pygithub
 from github import Github
@@ -146,8 +148,8 @@ class CrawlerGitHub:
                     clone_url = str(repo.clone_url)
                     description = str(repo.description)
                     language = str(repo.language)
-                    updated_at =  str(repo.updated_at)
-                    created_at = str(repo.created_at)
+                    updated_at = parser.parse(str(repo.updated_at)).replace(tzinfo=tz.gettz('UTC')).isoformat()
+                    created_at = parser.parse(str(repo.created_at)).replace(tzinfo=tz.gettz('UTC')).isoformat() 
                     deployable = 0 
 
                     try:
@@ -231,11 +233,13 @@ class CrawlerGitHub:
                     data_cleaned = data if from_url else self.preprocess.clean_export_data(data, file_name + keywords)
 
                     # at this point we have some data, so we can upload it to the database
-                    try:
-                        PrintLog.log(f"[GitHub] Upload to database called from GitHub crawler")
-                        _ = Database().insert_service(data_cleaned)
-                    except Exception as e:
-                        PrintLog.log(f"[GitHub] Error while inserting data into database: {e}")
+                  
+                    PrintLog.log(f"[GitHub] Upload to database called from GitHub crawler")
+                    res = Database().insert_service(data_cleaned)
+                    if res.status_code > 199 and res.status_code < 300:
+                        PrintLog.log(f"[GitHub] Upload to database successful")
+                    else:                 
+                        PrintLog.log(f"[GitHub] Error while inserting data into database: {res}")
 
                     return data_cleaned
 

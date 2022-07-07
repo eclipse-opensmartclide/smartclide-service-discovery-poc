@@ -15,6 +15,8 @@ import time
 import random
 import re
 import uuid
+import dateutil.parser as parser
+import dateutil.tz as tz
 
 # own
 from utils import SCRUtils, PrintLog
@@ -82,7 +84,6 @@ class CrawlerGitLab:
             header = {'Authorization': f"Bearer {self.token}"}
 
             response = SCRUtils.get_url(url, header)
-
             if response.status_code < 200 or response.status_code >= 300:
                 PrintLog.log(f"[GitLab] Error: {response.status_code}, Bad creditentials? Check the token.")
                 raise Exception("Bad Creditentials")
@@ -111,7 +112,23 @@ class CrawlerGitLab:
                 if('forks_count' not in repo): repo['forks_count'] = "0"
                 if('license' not in repo): 
                     repo['license'] = {}
-                    repo['license']['name'] = ""
+                    repo['license']['key'] = ""                
+                # repo['compliance_frameworks'] is a list of strings, convert to string
+                if('compliance_frameworks' not in repo):
+                    compliance_frameworks = ""
+                else:
+                    compliance_frameworks = ",".join(repo['compliance_frameworks'])
+
+                # Check files in the repo
+                # /projects/:id/repository/files/:file_path
+                url_files = f"https://gitlab.com/api/v4/projects/{repo['id']}/repository/files"
+                response_files = SCRUtils.get_url(url, header).json()
+                deployable = 0
+                if response_files:
+                    for file in response_files:
+                        if file['file_name'] == "Dockerfile":
+                            deployable = 1
+                            break
 
                 # If we have more tags, merge them with the current kw
                 merged_kw = payload.replace("+",",")
@@ -131,14 +148,14 @@ class CrawlerGitLab:
                     "url": repo['web_url'],
                     "description": description,
                     "is_public": True,
-                    "licence": repo['license']['name'],
-                    "framework": "",
-                    "created": repo['created_at'],
-                    "updated": repo['last_activity_at'],
+                    "licence": repo['license']['key'],
+                    "framework": compliance_frameworks,
+                    "created": parser.parse(repo['created_at']).replace(tzinfo=tz.gettz('UTC')).isoformat(),
+                    "updated": parser.parse(repo['last_activity_at']).replace(tzinfo=tz.gettz('UTC')).isoformat(),
                     "stars": int(repo['star_count']),                 
                     "forks": int(repo['forks_count']),
                     "watchers": int("0"),
-                    "deployable": 0, #TODO: check if deployable     
+                    "deployable": deployable,
                     "keywords": merged_kw_list,        
                 }
                 # Add json to data list
@@ -167,11 +184,11 @@ class CrawlerGitLab:
         data_cleaned = self.preprocess.clean_export_data(data, file_name + payload)
      
         # at this point we have some data, so we can upload it to the database
-        try:
-            PrintLog.log(f"[GitLab] Upload to database called from GitLab crawler")
-            _ = Database().insert_service(data_cleaned)
-        except Exception as e:
-            PrintLog.log(f"[GitLab] Error while inserting data into database: {e}")
+        res = Database().insert_service(data_cleaned)
+        if res.status_code > 199 and res.status_code < 300:
+            PrintLog.log(f"[GitLab] Upload to database successful")
+        else:                 
+            PrintLog.log(f"[GitLab] Error while inserting data into database: {res}")
 
         return data_cleaned
 

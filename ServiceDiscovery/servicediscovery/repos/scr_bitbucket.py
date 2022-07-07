@@ -16,6 +16,8 @@ import re
 import random
 from bs4 import BeautifulSoup
 import uuid
+import dateutil.parser as parser
+import dateutil.tz as tz
 
 # own
 from utils import SCRUtils, PrintLog
@@ -127,6 +129,9 @@ class CrawlerBitbucket:
                 
                 keyword_split_list = keyword_split.split(',')
 
+                updated_at = repo_metadata_li[1].find('time')['datetime']
+                updated_at_iso = parser.parse(updated_at).replace(tzinfo=tz.gettz('UTC')).isoformat()
+
                 # json datarepo
                 datarepo = {
                         "id" : str(uuid.uuid4()),
@@ -140,7 +145,7 @@ class CrawlerBitbucket:
                         "licence": "",
                         "framework": "",
                         "created": "",
-                        "updated": repo_metadata_li[1].find('time')['datetime'],
+                        "updated": updated_at_iso,
                         "stars": int('0'),
                         "forks": int('0'),
                         "watchers":  int(repo_metadata_li[0].find('a').text.strip().replace(" watchers", "").replace(" watcher", "")),
@@ -163,9 +168,10 @@ class CrawlerBitbucket:
         data_cleaned = self.preprocess.clean_export_data(data, file_name + keyword_split)
 
         # at this point we have some data, so we can upload it to the database
-        try:
-            PrintLog.log(f"[BitBucket] Upload to database called from BitBucket crawler")
-            _ = Database().insert_service(data_cleaned)
-        except Exception as e:
-            PrintLog.log(f"[BitBucket] Error while inserting data into database: {e}")
+        res = Database().insert_service(data_cleaned)
+        if res.status_code > 199 and res.status_code < 300:
+            PrintLog.log(f"[Bitbucket] Upload to database successful")
+        else:                 
+            PrintLog.log(f"[Bitbucket] Error while inserting data into database: {res}")
+
         return data_cleaned
