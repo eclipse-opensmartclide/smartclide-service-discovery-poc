@@ -30,7 +30,8 @@ class Database:
         database_config = ConfigReader.read_config(section="database")
         self.scheme = database_config["scheme"]
         self.host = database_config["host"]
-        self.header = {"Authorization": f"Bearer {database_config['token']}"}
+        if database_config.get('token'):
+            self.header = {"Authorization": f"Bearer {database_config['token']}"}
         self.registry_endpoint = database_config["registry_endpoint"]
         self.services_endpoint = database_config["services_endpoint"]
         self.database_endpoint = f"{self.scheme}://{self.host}"
