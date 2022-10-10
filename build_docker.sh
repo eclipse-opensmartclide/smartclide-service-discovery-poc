@@ -11,5 +11,5 @@
 #    David Berrocal Macías (@dabm-git) - initial API and implementation
 #*******************************************************************************
 
-docker build --tag ghcr.io/eclipse-researchlabs/smartclide/service-discovery:$(date +'%Y-%m-%d') .
-docker push ghcr.io/eclipse-researchlabs/smartclide/service-discovery:$(date +'%Y-%m-%d')
+docker build --tag ghcr.io/eclipse-opensmartclide/smartclide/service-discovery:$(date +'%Y-%m-%d') .
+docker push ghcr.io/eclipse-opensmartclide/smartclide/service-discovery:$(date +'%Y-%m-%d')

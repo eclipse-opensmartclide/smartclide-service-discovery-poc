@@ -1,5 +1,5 @@
 site_name: SmartCLIDE Service Discovery Component
-repo_url: https://github.com/eclipse-researchlabs/smartclide-service-discovery-poc
+repo_url: https://github.com/eclipse-opensmartclide/smartclide-service-discovery-poc
 
 nav:
   - Service Discovery: 'index.md'

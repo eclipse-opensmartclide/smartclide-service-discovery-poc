@@ -28,7 +28,7 @@ setup(
     version='1.0',
     packages=find_packages(),
     url='',
-    download_url='https://github.com/eclipse-researchlabs/smartclide-service-discovery-poc/archive/refs/heads/main.zip',
+    download_url='https://github.com/eclipse-opensmartclide/smartclide-service-discovery-poc/archive/refs/heads/main.zip',
     license='Eclipse Public License 2.0',
     author='David Berrocal Macías - AIR Institute',
     author_email='dberrocal@air-institute.com',
@@ -57,8 +57,8 @@ setup(
     keywords='scr, flask, python',
     python_requires='>=3',
     project_urls={
-        'Bug Reports': 'https://github.com/eclipse-researchlabs/smartclide-service-discovery-poc/issues',
-        'Source': 'https://github.com/eclipse-researchlabs/smartclide-service-discovery-poc',
-        'Documentation': 'https://github.com/eclipse-researchlabs/smartclide-service-discovery-poc/blob/main/README.md'
+        'Bug Reports': 'https://github.com/eclipse-opensmartclide/smartclide-service-discovery-poc/issues',
+        'Source': 'https://github.com/eclipse-opensmartclide/smartclide-service-discovery-poc',
+        'Documentation': 'https://github.com/eclipse-opensmartclide/smartclide-service-discovery-poc/blob/main/README.md'
     },
 )
