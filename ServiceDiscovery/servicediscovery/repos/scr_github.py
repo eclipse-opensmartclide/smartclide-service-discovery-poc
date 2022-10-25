@@ -66,7 +66,7 @@ class CrawlerGitHub:
             repos = self.token.search_repositories(query, 'stars', 'desc')
             if repos.totalCount == 0:
                 raise NoReposFound
-            repos_s = repos[:100] # Only explore the top 100 repos
+            repos_s = repos[:150] # Only explore the top 150 repos for faster results, less API calls and get the most relevant ones
             return self.get_repos(repos_s, p_topic, from_topic=True)
 
         except BadCredentialsException:
@@ -115,7 +115,7 @@ class CrawlerGitHub:
             repos = self.token.search_repositories(query, 'stars', 'desc')
             # check if paginated list is empty
             if (repos.totalCount != 0):
-                repos_s = repos[:100] # Only explore the top 100 repos
+                repos_s = repos[:150] # Only explore the top 150 repos for faster results, less API calls and get the most relevant ones
             else:
                 raise NoReposFound
 
