@@ -17,20 +17,25 @@ import requests
 from utils import ConfigReader, PrintLog
 
 # Database handler, search and insert services
+
+
 class Database:
 
-    host = ""
     scheme = ""
+    header = ""
+    host = ""
     registry_endpoint = ""
     services_endpoint = ""
-    header = ""
+    database_endpoint = ""
 
     # Parse the config file
     def __init__(self):
         database_config = ConfigReader.read_config(section="database")
         self.scheme = database_config["scheme"]
         self.host = database_config["host"]
-        self.header = {"Authorization": f"Bearer {database_config['token']}"}
+        if database_config.get('token'):
+            self.header = {
+                "Authorization": f"Bearer {database_config['token']}"}
         self.registry_endpoint = database_config["registry_endpoint"]
         self.services_endpoint = database_config["services_endpoint"]
         self.database_endpoint = f"{self.scheme}://{self.host}"
@@ -51,7 +56,6 @@ class Database:
     # Post handler
     def _post(self, endpoint, data):
         try:
-            print(self.database_endpoint + endpoint)
             res = requests.post(
                 self.database_endpoint + endpoint, headers=self.header, json=data
             )
@@ -60,11 +64,8 @@ class Database:
             PrintLog.log(f"[Database] Error in post(): {str(error)}")
             return None
 
-    # Insert a service, data is a list of {}
+    # Insert a service, data is a list of {} already preprocessed
     def insert_service(self, data):
-        # open a local document for writing debug purposes
-        # file = open('services.json', 'a+')
-        # file.write(json.dumps(data))
         return self._post(self.services_endpoint, data)
 
     def get_service_registries(self):
