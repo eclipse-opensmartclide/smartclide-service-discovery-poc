@@ -43,7 +43,7 @@ version: '3'
 services:
   service_discovery:
     restart: unless-stopped
-    image: ghcr.io/eclipse-opensmartclide/smartclide/service-discovery:2022-04-04
+    image: ghcr.io/eclipse-opensmartclide/smartclide/service-discovery:2022-10-10
     working_dir: /app/smartclide-service-discovery-poc/ServiceDiscovery
     command: python3 ServiceDiscovery
     ports:
