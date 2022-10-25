@@ -41,7 +41,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     rm -rf /var/lib/apt/lists/*
 
 # clone smartclide-smart-assistant
-RUN git clone https://github.com/eclipse-researchlabs/smartclide-service-discovery-poc.git
+RUN git clone https://github.com/eclipse-opensmartclide/smartclide-service-discovery-poc.git
 
 # build ServiceDiscovery
 RUN cd smartclide-service-discovery-poc/ServiceDiscovery && \

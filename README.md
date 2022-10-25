@@ -16,7 +16,7 @@ Maintainer:  @dabm-git - AIR Institute
 ## Configure 
 This package relies on tokens from GitGub, GitLab and BitBucket APIs that are configured in the config.ini file in the root of the service.
 The service also depends on an instance of Elasticsearch to store and collect information, where the configuration of the IP, port and credentials are done in this same file.
-    See: https://github.com/eclipse-researchlabs/smartclide-service-discovery-poc/blob/main/ServiceDiscovery/config.ini
+    See: https://github.com/eclipse-opensmartclide/smartclide-service-discovery-poc/blob/main/ServiceDiscovery/config.ini
 
 The service makes use of the 2020 port, be sure to expose it.
 
@@ -43,14 +43,14 @@ version: '3'
 services:
   service_discovery:
     restart: unless-stopped
-    image: ghcr.io/eclipse-researchlabs/smartclide/service-discovery:2022-04-04
+    image: ghcr.io/eclipse-opensmartclide/smartclide/service-discovery:2022-10-10
     working_dir: /app/smartclide-service-discovery-poc/ServiceDiscovery
     command: python3 ServiceDiscovery
     ports:
       - "2020:2020"
 ```
 
-Be sure to replace the necessary configuration in the [config.ini](https://github.com/eclipse-researchlabs/smartclide-service-discovery-poc/blob/main/ServiceDiscovery/config.ini) file, to do this you can overwrite it with the following section in docker-compose.yml:
+Be sure to replace the necessary configuration in the [config.ini](https://github.com/eclipse-opensmartclide/smartclide-service-discovery-poc/blob/main/ServiceDiscovery/config.ini) file, to do this you can overwrite it with the following section in docker-compose.yml:
 ```
 volumes:
  -./config.ini:/app/smartclide-service-discovery-poc/ServiceDiscovery/config.ini
