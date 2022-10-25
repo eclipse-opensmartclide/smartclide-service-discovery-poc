@@ -121,14 +121,12 @@ class CrawlerGitLab:
 
                 # Check files in the repo
                 # /projects/:id/repository/files/:file_path
-                url_files = f"https://gitlab.com/api/v4/projects/{repo['id']}/repository/files"
-                response_files = SCRUtils.get_url(url, header).json()
-                deployable = 0
-                if response_files:
-                    for file in response_files:
-                        if file['file_name'] == "Dockerfile":
-                            deployable = 1
-                            break
+                #url_files_main = f"https://gitlab.com/api/v4/projects/{repo['id']}/repository/files/Dockerfile?ref=main"
+                url_files_master = f"https://gitlab.com/api/v4/projects/{repo['id']}/repository/files/Dockerfile?ref=main"
+                response_files = SCRUtils.get_url(url_files_master, header)
+                deployable = 0                
+                if response_files.status_code == 200:                                     
+                    deployable = 1
 
                 # If we have more tags, merge them with the current kw
                 merged_kw = payload.replace("+",",")
