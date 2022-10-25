@@ -1,27 +1,30 @@
-#*******************************************************************************
+# *******************************************************************************
 # Copyright (C) 2022 AIR Institute
-# 
+#
 # This program and the accompanying materials are made
 # available under the terms of the Eclipse Public License 2.0
 # which is available at https://www.eclipse.org/legal/epl-2.0/
-# 
+#
 # SPDX-License-Identifier: EPL-2.0
-# 
+#
 # Contributors:
 #    David Berrocal Macías (@dabm-git) - initial API and implementation
-#*******************************************************************************
+# *******************************************************************************
 
 import io
 from setuptools import setup, find_packages
+
 
 def readme():
     with io.open('README.md', encoding='utf-8') as f:
         return f.read()
 
+
 def read_requeriments_file(filename):
     with io.open(filename, encoding='utf-8') as f:
         for line in f.readlines():
             yield line.strip()
+
 
 setup(
     name='SmartCLIDE - Service Discovery API',

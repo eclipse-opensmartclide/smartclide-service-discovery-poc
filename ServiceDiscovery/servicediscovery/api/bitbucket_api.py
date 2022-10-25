@@ -1,15 +1,15 @@
-#*******************************************************************************
+# *******************************************************************************
 # Copyright (C) 2022 AIR Institute
-# 
+#
 # This program and the accompanying materials are made
 # available under the terms of the Eclipse Public License 2.0
 # which is available at https://www.eclipse.org/legal/epl-2.0/
-# 
+#
 # SPDX-License-Identifier: EPL-2.0
-# 
+#
 # Contributors:
 #    David Berrocal Macías (@dabm-git) - initial API and implementation
-#*******************************************************************************
+# *******************************************************************************
 
 from flask_restx import Resource
 
@@ -23,9 +23,11 @@ from config import ServiceDiscoeryConfig
 from api.parsers.bitbucket_parser import bitbucket_argument_parser
 from repos.scr_bitbucket import CrawlerBitbucket
 
-bitbucket_ns = api.namespace('crawl_bitbucket', description='Crawler Bitbucket')
+bitbucket_ns = api.namespace(
+    'crawl_bitbucket', description='Crawler Bitbucket')
 
-@bitbucket_ns.route('', methods = ['GET']) # url/user
+
+@bitbucket_ns.route('', methods=['GET'])  # url/user
 class GetBitbucketRepos(Resource):
     @limiter.limit('1000/hour')
     @cache.cached(timeout=84600, query_string=True)
@@ -41,20 +43,20 @@ class GetBitbucketRepos(Resource):
         r_json = None
         try:
             args = bitbucket_argument_parser.parse_args()
-            
+
             from_keyword = args['from_keyword']
 
             # Only one
             if from_keyword is None:
                 raise Exception("ValueError")
-            
+
         except Exception as e:
             #raise e
             return FlaskUtils.handle400error(bitbucket_ns, 'The providen arguments are not correct.')
 
         # retrieve repos
         try:
-            bitbucket = CrawlerBitbucket()              
+            bitbucket = CrawlerBitbucket()
             r = bitbucket.get_from_keywords_web(from_keyword)
             r_json = r or ""
 

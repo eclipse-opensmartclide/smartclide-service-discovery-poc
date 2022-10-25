@@ -1,4 +1,4 @@
-#*******************************************************************************
+# *******************************************************************************
 # Copyright (C) 2022 AIR Institute
 # 
 # This program and the accompanying materials are made
@@ -9,7 +9,7 @@
 # 
 # Contributors:
 #    David Berrocal Macías (@dabm-git) - initial API and implementation
-#*******************************************************************************
+# *******************************************************************************
 
 python3 -m pip install --no-cache-dir -r requirements.txt
 python3 -m pip install . --upgrade --use-feature=in-tree-build
