@@ -8,7 +8,7 @@ Flask-Limiter==2.4.6
 requests-random-user-agent==2022.6.7
 bs4==0.0.1
 pandas==1.4.2
-numpy==1.22.4
+numpy==1.24.2
 lxml==4.9.0
 PyGithub==1.55
 langdetect==1.0.9
