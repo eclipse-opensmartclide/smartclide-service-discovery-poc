@@ -1,15 +1,15 @@
-#*******************************************************************************
+# *******************************************************************************
 # Copyright (C) 2022 AIR Institute
-# 
+#
 # This program and the accompanying materials are made
 # available under the terms of the Eclipse Public License 2.0
 # which is available at https://www.eclipse.org/legal/epl-2.0/
-# 
+#
 # SPDX-License-Identifier: EPL-2.0
-# 
+#
 # Contributors:
 #    David Berrocal Macías (@dabm-git) - initial API and implementation
-#*******************************************************************************
+# *******************************************************************************
 
 from flask import Flask, Blueprint, redirect, request
 from flask_cors import CORS
@@ -33,7 +33,8 @@ app = Flask(__name__)
 VERSION = (1, 0)
 AUTHOR = 'David Berrocal Macías - AIR Institute (dberrocal@air-institute.com)'
 
-namespaces = [ github_ns, gitlab_ns, bitbucket_ns]# ,search_ns, insert_ns]
+namespaces = [github_ns, gitlab_ns, bitbucket_ns]
+
 
 def get_version():
     """
@@ -41,15 +42,18 @@ def get_version():
     """
     return '.'.join(map(str, VERSION))
 
+
 def get_authors():
     """
     This function returns the API's author name.
     """
     return str(AUTHOR)
 
+
 __version__ = get_version()
 __author__ = get_authors()
-    
+
+
 @app.route('/')
 def register_redirection():
     """
@@ -64,7 +68,7 @@ def initialize_app(flask_app):
     """
     CORS(flask_app)
 
-    v1 = Blueprint('api', __name__, url_prefix = FlaskConfig.URL_PREFIX)
+    v1 = Blueprint('api', __name__, url_prefix=FlaskConfig.URL_PREFIX)
     api.init_app(v1)
 
     limiter.exempt(v1)
@@ -75,14 +79,15 @@ def initialize_app(flask_app):
 
     for ns in namespaces:
         api.add_namespace(ns)
-             
+
+
 def main():
     # logging
-    logging.basicConfig(handlers=[logging.FileHandler(filename='servicediscovery_api.log', 
-                            encoding='utf-8')],
-                            level=logging.INFO,
-                            format='%(asctime)s %(message)s', 
-                            datefmt='%d/%m/%Y %I:%M:%S %p')
+    logging.basicConfig(handlers=[logging.FileHandler(filename='servicediscovery_api.log',
+                                                      encoding='utf-8')],
+                        level=logging.INFO,
+                        format='%(asctime)s %(message)s',
+                        datefmt='%d/%m/%Y %I:%M:%S %p')
 
     initialize_app(app)
 
@@ -98,16 +103,20 @@ def main():
 
     PrintLog.log(f'Authors: {get_authors()}')
     PrintLog.log(f'Version: {get_version()}')
-    PrintLog.log(f'Base URL: http://localhost:{FlaskConfig.PORT}{FlaskConfig.URL_PREFIX}')
+    PrintLog.log(
+        f'Base URL: http://localhost:{FlaskConfig.PORT}{FlaskConfig.URL_PREFIX}')
     PrintLog.log(separator_str)
 
     if not FlaskConfig.USE_HTTPS:
-        app.run(host=FlaskConfig.HOST, port=FlaskConfig.PORT, debug=FlaskConfig.DEBUG_MODE, threaded=True)
+        app.run(host=FlaskConfig.HOST, port=FlaskConfig.PORT,
+                debug=FlaskConfig.DEBUG_MODE, threaded=True)
     else:
         Talisman(app, force_https=True)
         context = ssl.SSLContext(ssl.PROTOCOL_TLSv1_2)
-        context.load_cert_chain(FlaskConfig.SSL_CERT, FlaskConfig.SSL_KEY)   
-        app.run(host=FlaskConfig.HOST, port=FlaskConfig.PORT, debug=FlaskConfig.DEBUG_MODE, threaded=True, ssl_context=context)
+        context.load_cert_chain(FlaskConfig.SSL_CERT, FlaskConfig.SSL_KEY)
+        app.run(host=FlaskConfig.HOST, port=FlaskConfig.PORT,
+                debug=FlaskConfig.DEBUG_MODE, threaded=True, ssl_context=context)
+
 
 if __name__ == '__main__':
     main()
