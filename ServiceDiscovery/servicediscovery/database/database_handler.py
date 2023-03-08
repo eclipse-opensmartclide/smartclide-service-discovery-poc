@@ -12,18 +12,16 @@
 # *******************************************************************************
 
 import requests
+import pandas as pd
 
 # Own
-from utils import ConfigReader, PrintLog
+from utils import ConfigReader, PrintLog, SCRUtils
+from .serviceclassification import ClassifyServices
 
-# Database handler, search and insert services
+
 class Database:
 
-    host = ""
-    scheme = ""
-    registry_endpoint = ""
-    services_endpoint = ""
-    header = ""
+    ClassifyService = ClassifyServices()
 
     # Parse the config file
     def __init__(self):
@@ -31,7 +29,10 @@ class Database:
         self.scheme = database_config["scheme"]
         self.host = database_config["host"]
         if database_config.get('token'):
-            self.header = {"Authorization": f"Bearer {database_config['token']}"}
+            self.header = {
+                "Authorization": f"Bearer {database_config['token']}"}
+        else:
+            self.header = ""
         self.registry_endpoint = database_config["registry_endpoint"]
         self.services_endpoint = database_config["services_endpoint"]
         self.database_endpoint = f"{self.scheme}://{self.host}"
@@ -43,7 +44,7 @@ class Database:
                 self.database_endpoint + endpoint, headers=self.header, json=data
             )
             if res.status_code < 199 and res.status_code > 300:
-                raise Exception(f"{res}")
+                raise Exception(f"{res}")  # Specific exception?
             return res
         except Exception as error:
             PrintLog.log(f"[Database] Error in get(): {str(error)}")
@@ -52,21 +53,41 @@ class Database:
     # Post handler
     def _post(self, endpoint, data):
         try:
-            print(self.database_endpoint + endpoint)
-            res = requests.post(
+            return requests.post(
                 self.database_endpoint + endpoint, headers=self.header, json=data
             )
-            return res
         except Exception as error:
             PrintLog.log(f"[Database] Error in post(): {str(error)}")
             return None
-
-    # Insert a service, data is a list of {}
-    def insert_service(self, data):
-        # open a local document for writing debug purposes
-        # file = open('services.json', 'a+')
-        # file.write(json.dumps(data))
-        return self._post(self.services_endpoint, data)
+    def export_crawled_data(self,data_list, file_name):
+        # convert the list data_list to dataframe
+        df = pd.DataFrame(data_list, columns=[
+            "id",
+            "name",
+            "user_id",
+            "registry_id",
+            "git_credentials_id",
+            "url",
+            "description",
+            "is_public",
+            "licence",
+            "framework",
+            "created",
+            "updated",
+            "stars",
+            "forks",
+            "watchers",
+            "deployable",
+            "keywords",
+        ])
+        # Export the dataframe to csv file
+        SCRUtils.export_csv(df, file_name, True, True)
+    # Insert a service, data is a list of dict
+    def insert_service(self, data, name):
+        # call the DLE class service
+        data_classified = self.ClassifyService.classify_services(data)
+        self.export_crawled_data(data_classified, name)
+        return self._post(self.services_endpoint, data_classified)
 
     def get_service_registries(self):
         return self._get(self.registry_endpoint, None)
