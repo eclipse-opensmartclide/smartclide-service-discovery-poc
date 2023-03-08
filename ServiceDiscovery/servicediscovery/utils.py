@@ -79,35 +79,35 @@ class SCRUtils():
 
 class FlaskUtils():
 
-    def handle200error(self, message):
+    def handle200error(ns, message):
         """
         Function to handle 200 response
         """
         return message.json()
 
-    def handle400error(self, message):
+    def handle400error(ns, message):
         """
         Function to handle a 400 (bad arguments code) error.
         """
-        return self.abort(400, status=message, statusCode="400")
+        return ns.abort(400, status=message, statusCode="400")
 
-    def handle404error(self, message):
+    def handle404error(ns, message):
         """
         Function to handle a 404 (not found) error.
         """
-        return self.abort(404, status=message, statusCode="404")
+        return ns.abort(404, status=message, statusCode="404")
 
-    def handle503error(self, message):
+    def handle503error(ns, message):
         """
         Function to handle a 503 (Service Unavailable ) error.
         """
-        return self.abort(503, status=message, statusCode="503")
+        return ns.abort(503, status=message, statusCode="503")
 
-    def handle500error(self, message=None):
+    def handle500error(ns, message=None):
         """
         Function to handle a 500 (unknown) error.
         """
         if message is None:
             message = "Unknown error, please contact administrator."
 
-        return self.abort(500, status=message, statusCode="500")
+        return ns.abort(500, status=message, statusCode="500")
