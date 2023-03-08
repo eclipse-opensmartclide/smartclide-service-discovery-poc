@@ -15,7 +15,7 @@ Maintainer:  @dabm-git - AIR Institute
 
 ## Configure 
 This package relies on tokens from GitGub, GitLab and BitBucket APIs that are configured in the config.ini file in the root of the service.
-The service also depends on an instance of Elasticsearch to store and collect information, where the configuration of the IP, port and credentials are done in this same file.
+The service also relies on a database instance to store information, and in the classification service offered by SmartCLIDE's DLE component to classify the discovered services, where the configuration of the IP, port and credentials are done in this same file.
     See: https://github.com/eclipse-opensmartclide/smartclide-service-discovery-poc/blob/main/ServiceDiscovery/config.ini
 
 The service makes use of the 2020 port, be sure to expose it.
