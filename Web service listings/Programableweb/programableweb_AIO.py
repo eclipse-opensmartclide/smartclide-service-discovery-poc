@@ -1,15 +1,15 @@
-#*******************************************************************************
+# *******************************************************************************
 # Copyright (C) 2022 AIR Institute
-# 
+#
 # This program and the accompanying materials are made
 # available under the terms of the Eclipse Public License 2.0
 # which is available at https://www.eclipse.org/legal/epl-2.0/
-# 
+#
 # SPDX-License-Identifier: EPL-2.0
-# 
+#
 # Contributors:
 #    David Berrocal Macías (@dabm-git) - initial API and implementation
-#*******************************************************************************
+# *******************************************************************************
 
 """ Programableweb
 !pip install requests-random-user-agent
@@ -34,6 +34,7 @@ import re
 pd.options.mode.chained_assignment = None
 # List url processing
 
+
 class ProgWeb:
     @staticmethod
     def _download_list(urlsSplited):
@@ -47,8 +48,8 @@ class ProgWeb:
         df_temp = pd.DataFrame()
 
         for url in urlsSplited:
-            
-            time.sleep(0.1) # More?
+
+            time.sleep(0.1)  # More?
 
             rq = requests.get(url, allow_redirects=False)
 
@@ -217,7 +218,6 @@ class ProgWeb:
                 if (meta_specs == None):
                     continue
                 selected = meta_specs.select("label")
-               
 
             if selected == None:
                 continue
@@ -603,7 +603,7 @@ class Utils:
         else:
             return pd.DataFrame()
 
-# DW
+
 def download_data(dataType, url, numPages, numWorkers, listName, batchName, forceListUpdate):
     """
     Creates a DataFrame from dataType programmableweb URL
@@ -621,7 +621,7 @@ def download_data(dataType, url, numPages, numWorkers, listName, batchName, forc
     """
     df_temp = ProgWeb.download_list(url, numPages, numWorkers,
                                     listName, forceListUpdate)
-    
+
     # time.sleep(120)  # ?
 
     # Creates new columns based on type
@@ -675,7 +675,7 @@ def download_data(dataType, url, numPages, numWorkers, listName, batchName, forc
         df_temp['Response Formats'] = ""
         df_temp['Unofficial'] = ""
 
-        print("download_meta_meta_url API")        
+        print("download_meta_meta_url API")
         # First call to get the meta meta URL, 2 call to get the data
         df_temp = ProgWeb.download_meta_url(
             df_temp, numWorkers, dataType, batchName, 1)
@@ -699,6 +699,7 @@ def download_data(dataType, url, numPages, numWorkers, listName, batchName, forc
         df_temp, numWorkers, dataType, batchName, 0)
 
     return df_temp
+
 
 # CONSTANTS
 # Relative path
@@ -770,10 +771,10 @@ TODO?: handle 429 with proxys?
 
 # print("\nAPI")
 # df_api = download_data(API_TYPE,
-#                        API_URL, 
+#                        API_URL,
 #                        API_PAGES,
 #                        30, # Num threads
-#                        API_LIST, 
+#                        API_LIST,
 #                        API_BATCH,
 #                        False) # Force Update List
 # print("\nFin")
