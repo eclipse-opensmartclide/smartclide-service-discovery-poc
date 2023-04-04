@@ -12,7 +12,7 @@
 #*******************************************************************************
 
 # Download the base image ubuntu v20.04
-FROM ubuntu:20.04
+FROM ubuntu:22.04
 
 MAINTAINER AIR Institute "dberrocal@air-institute.com"
 
